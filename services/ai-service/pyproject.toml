@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Sathi AI service: live tutor (RAG + web search), ingestion, quiz generation, grading, mastery, evaluation."
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "anthropic>=1.15.0,<2",
+    "anthropic>=1.15.0,<3",
     "fastapi>=0.143.3,<1",
     "uvicorn[standard]>=0.54.0,<1",
     "pydantic>=2.14.1,<3",
