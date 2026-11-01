@@ -3,7 +3,7 @@
 # Build context = REPO ROOT:  docker build -f apps/web/Dockerfile -t sathi-web .
 
 # ---- 1. build ---------------------------------------------------------------
-FROM node:22-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /src/apps/web
 ENV NG_CLI_ANALYTICS=false CI=true
 COPY apps/web/package.json apps/web/package-lock.json ./
