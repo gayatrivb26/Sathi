@@ -49,7 +49,7 @@ jobs:
       web: ${{ steps.d.outputs.web }}
       e2e: ${{ steps.d.outputs.e2e }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: d
         name: Detect components
         run: |
@@ -64,7 +64,7 @@ jobs:
   infra:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Static checks (compose, promtool, otelcol, nginx)
         run: ./scripts/check-monitoring.sh
       - name: shellcheck
@@ -74,7 +74,7 @@ jobs:
   secrets:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Install gitleaks
@@ -91,8 +91,8 @@ jobs:
     if: needs.detect.outputs.dotnet == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"
           cache: true
@@ -128,7 +128,7 @@ jobs:
           dotnet test "${{ steps.sln.outputs.path }}" --no-build -c Release
           --logger "trx;LogFilePrefix=results" --results-directory TestResults
           --collect "XPlat Code Coverage"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: dotnet-test-results
@@ -163,8 +163,8 @@ jobs:
       STORAGE_BUCKET: sathi-documents
       PROMPTS_DIR: ${{ github.workspace }}/prompts
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v5
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
           cache-dependency-glob: services/ai-service/uv.lock
@@ -204,7 +204,7 @@ jobs:
             exit 1
           fi
           echo "ai-internal.v1.json is up to date"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: python-test-results
@@ -220,8 +220,8 @@ jobs:
       run:
         working-directory: apps/web
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -237,7 +237,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Playwright journeys (mocked API)
         run: npm run e2e:mock --if-present
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: playwright-report
@@ -260,16 +260,16 @@ jobs:
           - { name: migrator-app, dockerfile: services/api/Dockerfile.migrator,  gate: dotnet }
           - { name: ai-service,   dockerfile: services/ai-service/Dockerfile,    gate: python }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Skip if the Dockerfile does not exist yet
         id: exists
         run: |
           if [ -f "${{ matrix.dockerfile }}" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "::notice::${{ matrix.dockerfile }} not found, skipping"; fi
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
         if: steps.exists.outputs.ok == 'true'
       - name: Build ${{ matrix.name }}
         if: steps.exists.outputs.ok == 'true'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.dockerfile }}
@@ -281,7 +281,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
       - name: Trivy scan (fail on CRITICAL)
         if: steps.exists.outputs.ok == 'true'
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: sathi/${{ matrix.name }}:ci
           format: table
@@ -304,7 +304,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Generate throw-away secrets
         run: ./scripts/generate-secrets.sh --force
       - name: Start stack (compose.test.yaml, fake AI providers)
@@ -348,7 +348,7 @@ jobs:
       BASE_REF: ${{ github.base_ref }}
       ALLOW_BREAKING: ${{ contains(github.event.pull_request.labels.*.name, 'openapi-breaking-ok') }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: oasdiff breaking (PR base branch -> this PR)
@@ -393,8 +393,8 @@ jobs:
       BASE_URL: http://localhost:8080
       MAILPIT_URL: http://localhost:8025
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       - name: Generate throw-away secrets
@@ -409,7 +409,7 @@ jobs:
           npx playwright install --with-deps chromium
       - name: Playwright (real stack)
         run: npx playwright test -c tests/e2e/playwright.config.ts
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: e2e-playwright-report
