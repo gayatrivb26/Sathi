@@ -1,0 +1,32 @@
+# Normalise line endings in the repository; check out with native endings by default.
+* text=auto
+
+# Shell scripts, container entrypoints and anything executed inside Linux containers
+# must keep LF endings even on Windows checkouts (CRLF breaks /bin/sh and bash).
+*.sh            text eol=lf
+*.bash          text eol=lf
+**/docker-entrypoint*  text eol=lf
+**/Dockerfile*  text eol=lf
+*.conf          text eol=lf
+*.yaml          text eol=lf
+*.yml           text eol=lf
+*.sql           text eol=lf
+*.py            text eol=lf
+.env.example    text eol=lf
+
+# PowerShell scripts keep CRLF so Windows PowerShell 5.1 is happy.
+*.ps1           text eol=crlf
+
+# Binary assets
+*.pdf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.docx  binary
+*.onnx  binary

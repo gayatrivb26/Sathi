@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>Sathi.Jobs</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\api\src\Sathi.Core\Sathi.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Hangfire dashboard customisations (contract 11.10), served through DashboardRoutes.AddStylesheet/AddJavaScript. -->
+    <EmbeddedResource Include="Dashboard\sathi-dashboard.css" LogicalName="Sathi.Jobs.Dashboard.sathi-dashboard.css" />
+    <EmbeddedResource Include="Dashboard\sathi-dashboard.js" LogicalName="Sathi.Jobs.Dashboard.sathi-dashboard.js" />
+  </ItemGroup>
+
+</Project>

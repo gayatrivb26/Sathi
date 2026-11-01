@@ -1,0 +1,63 @@
+# Build context is the repository root for every image; keep it small and secret-free.
+
+# VCS / CI / editor
+.git
+.gitignore
+.gitattributes
+.github
+.vscode
+.idea
+.vs
+*.swp
+*.user
+*.suo
+
+# Secrets — never in an image layer
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.key
+**/*.pfx
+**/secrets/
+
+# .NET build output
+**/bin
+**/obj
+**/TestResults
+
+# Node / Angular
+**/node_modules
+**/dist
+**/.angular
+**/coverage
+**/test-results
+**/playwright-report
+**/blob-report
+**/.cache
+
+# Python
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.coverage
+**/htmlcov
+
+# Large / irrelevant files at the root
+/*.pdf
+/docs
+/ml
+/tests/load
+/sarthi-master prompt.md
+
+# Local runtime data
+**/*.log
+**/.DS_Store
+Thumbs.db
+
+# Local backups
+backups/

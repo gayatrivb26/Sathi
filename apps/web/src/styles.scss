@@ -1,0 +1,5 @@
+/* Sathi global styles. Fonts and KaTeX CSS are added via angular.json "styles". */
+@use 'styles/tokens';
+@use 'styles/material';
+@use 'styles/base';
+@use 'styles/components';

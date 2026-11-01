@@ -1,0 +1,176 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="top">
+  <app-logo />
+  <ol class="steps" aria-label="Setup progress">
+    @for (s of ['Course', 'Level', 'Quick check']; track s; let i = $index) {
+      <li [class.done]="stepIndex() > i + 1" [class.current]="stepIndex() === i + 1" [attr.aria-current]="stepIndex() === i + 1 ? 'step' : null">
+        <span class="n" aria-hidden="true">
+          @if (stepIndex() > i + 1) { <app-icon name="check" [size]="14" [strokeWidth]="3" /> } @else { {{ i + 1 }} }
+        </span>
+        <span class="lbl">{{ s }}</span>
+      </li>
+    }
+  </ol>
+  <button matButton="text" type="button" (click)="signOut()">Sign out</button>
+</header>
+
+<main id="main-content" tabindex="-1" class="wrap">
+  <app-offline-banner />
+  @if (error(); as e) {
+    <app-error-state [error]="e" title="That didn’t work" [compact]="true" [retryable]="false" />
+  }
+
+  @switch (step()) {
+    @case ('course') {
+      <section aria-labelledby="h-course">
+        <p class="eyebrow">Step 1 of 3</p>
+        <h1 id="h-course">Hi {{ auth.firstName() }} — what would you like to learn?</h1>
+        <p class="lede">Pick a course. You can switch later in Settings.</p>
+        @switch (courses.status()) {
+          @case ('loading') {
+            <div class="course-grid"><app-skeleton [lines]="2" /><app-skeleton [lines]="2" /><app-skeleton [lines]="2" /></div>
+          }
+          @case ('error') {
+            <app-error-state [error]="courses.error()" title="We couldn’t load the courses" (retry)="courses.load()" />
+          }
+          @default {
+            <div class="course-grid" role="group" aria-labelledby="h-course">
+              @for (c of courses.data(); track c.id) {
+                <button type="button" class="course" [attr.aria-pressed]="courseId() === c.id" [class.on]="courseId() === c.id" (click)="chooseCourse(c)">
+                  <span class="course-icon" aria-hidden="true"><app-icon name="book" [size]="22" /></span>
+                  <span class="course-title">{{ c.title }}</span>
+                  <span class="course-desc">{{ c.description }}</span>
+                  <span class="course-meta">{{ c.moduleCount }} module{{ c.moduleCount === 1 ? '' : 's' }} · {{ c.lessonCount }} lesson{{ c.lessonCount === 1 ? '' : 's' }}{{ c.enrolled ? ' · Enrolled' : '' }}</span>
+                  <span class="course-tags">
+                    @if (c.visibility === 'private') {
+                      <span class="pill neutral"><app-icon name="lock" [size]="12" /> Private · via your class</span>
+                    } @else {
+                      <span class="pill neutral"><app-icon name="globe" [size]="12" /> Public</span>
+                    }
+                    @for (k of c.classes; track k.id) {
+                      <span class="pill"><app-icon name="classes" [size]="12" /> {{ k.name }}</span>
+                    }
+                  </span>
+                  @if (courseId() === c.id) { <span class="tick" aria-hidden="true"><app-icon name="check" [size]="16" [strokeWidth]="3" /></span> }
+                </button>
+              } @empty {
+                <p class="muted">No courses are published yet. Check back soon.</p>
+              }
+            </div>
+            <p class="join-hint"><app-icon name="key" [size]="16" /> Have a class code from your teacher? <a routerLink="/join">Join a class</a></p>
+          }
+        }
+        <div class="actions">
+          <button matButton="filled" type="button" [disabled]="!courseId() || busy()" (click)="continueFromCourse()">
+            {{ busy() ? 'Saving…' : 'Continue' }} <app-icon name="arrow-right" [size]="18" />
+          </button>
+        </div>
+      </section>
+    }
+
+    @case ('level') {
+      <section aria-labelledby="h-level">
+        <p class="eyebrow">Step 2 of 3</p>
+        <h1 id="h-level">How should Sathi explain things?</h1>
+        <p class="lede">This sets the tutor’s default level. You can change it any time — even mid-conversation.</p>
+        <div class="level-grid" role="group" aria-labelledby="h-level">
+          @for (l of levels; track l.id) {
+            <button type="button" class="level" [attr.aria-pressed]="level() === l.id" [class.on]="level() === l.id" (click)="level.set(l.id)">
+              <span class="level-icon" aria-hidden="true"><app-icon [name]="l.icon" [size]="22" /></span>
+              <span class="course-title">{{ l.title }}</span>
+              <span class="course-desc">{{ l.text }}</span>
+              @if (level() === l.id) { <span class="tick" aria-hidden="true"><app-icon name="check" [size]="16" [strokeWidth]="3" /></span> }
+            </button>
+          }
+        </div>
+        <div class="actions">
+          <button matButton="text" type="button" (click)="back()"><app-icon name="arrow-left" [size]="18" /> Back</button>
+          <button matButton="filled" type="button" [disabled]="busy()" (click)="continueFromLevel()">
+            {{ busy() ? 'Saving…' : 'Continue' }} <app-icon name="arrow-right" [size]="18" />
+          </button>
+        </div>
+      </section>
+    }
+
+    @case ('intro') {
+      <section class="intro card" aria-labelledby="h-intro">
+        <span class="intro-icon" aria-hidden="true"><app-icon name="target" [size]="30" /></span>
+        <p class="eyebrow">Step 3 of 3</p>
+        <h1 id="h-intro">A quick check to find your starting point</h1>
+        <p class="lede">About 3 minutes, one question per topic. It isn’t graded — <strong>“I don’t know”</strong> is a perfectly good answer and helps us more than a guess.</p>
+        <ul class="perks">
+          <li><app-icon name="route" [size]="18" /> We skip what you already know.</li>
+          <li><app-icon name="chart" [size]="18" /> You’ll see your starting mastery per topic.</li>
+        </ul>
+        <div class="actions">
+          <button matButton="text" type="button" (click)="back()"><app-icon name="arrow-left" [size]="18" /> Back</button>
+          <span class="spacer"></span>
+          <button matButton="outlined" type="button" [disabled]="busy()" (click)="skipDiagnostic()">Skip for now</button>
+          <button matButton="filled" type="button" [disabled]="busy()" (click)="startDiagnostic()">{{ busy() ? 'Preparing…' : 'Start the check' }}</button>
+        </div>
+      </section>
+    }
+
+    @case ('quiz') {
+      @if (question(); as q) {
+        <section aria-labelledby="h-quiz">
+          <div class="quiz-head">
+            <h1 id="h-quiz" class="quiz-title">Quick check · {{ q.conceptName }}</h1>
+            <span class="muted num">Question {{ index() + 1 }} of {{ total() }}</span>
+          </div>
+          <div class="bar quiz-bar" role="progressbar" aria-label="Quick check progress" [attr.aria-valuenow]="index() + (result() ? 1 : 0)" aria-valuemin="0" [attr.aria-valuemax]="total()">
+            <div class="fill" [style.width.%]="((index() + (result() ? 1 : 0)) / total()) * 100"></div>
+          </div>
+          <div class="card">
+            <app-question-card [question]="q" [reveal]="result()" [busy]="busy()" [allowIdk]="true" (answer)="answer($event)" (idk)="next()" />
+            @if (result(); as r) {
+              <div class="feedback" role="status" [class.ok]="r.isCorrect">
+                <strong>{{ r.isCorrect ? 'Nice — that’s right.' : 'Not quite — no problem, we’ll cover this.' }}</strong>
+                <span>{{ r.explanation }}</span>
+              </div>
+              <div class="actions">
+                <button matButton="filled" type="button" (click)="next()" [disabled]="busy()">
+                  {{ index() + 1 >= total() ? 'See my starting point' : 'Next question' }} <app-icon name="arrow-right" [size]="18" />
+                </button>
+              </div>
+            }
+          </div>
+          <p class="skip-line"><button type="button" class="link-btn" (click)="skipDiagnostic()" [disabled]="busy()">Skip the rest of the check</button></p>
+        </section>
+      }
+    }
+
+    @case ('results') {
+      <section aria-labelledby="h-results">
+        <p class="eyebrow">All set</p>
+        <h1 id="h-results">Here’s your starting point</h1>
+        <p class="lede">Sathi will focus on the topics marked “needs work” first. This updates every time you practise.</p>
+        <div class="results">
+          <div class="card">
+            <h2>Starting mastery</h2>
+            <div class="stack">
+              @for (m of completion()?.masteryChanges ?? []; track m.conceptId) {
+                <app-mastery-bar [name]="m.name" [mastery]="m.after" [attempts]="m.before === m.after ? 0 : 1" />
+              } @empty {
+                <p class="muted">We’ll learn your strengths as you practise.</p>
+              }
+            </div>
+          </div>
+          <div class="card">
+            <h2>Study next</h2>
+            <ul class="next-list">
+              @for (s of completion()?.studyNext ?? []; track s.targetId + s.type) {
+                <li><span class="pill">{{ s.title }}</span><span class="muted">{{ s.reason }}</span></li>
+              } @empty {
+                <li class="muted">Start with the first lesson of {{ selectedCourse()?.title ?? 'your course' }}.</li>
+              }
+            </ul>
+          </div>
+        </div>
+        <div class="actions">
+          <button matButton="filled" class="btn-amber" type="button" (click)="goHome()">Go to my home <app-icon name="arrow-right" [size]="18" /></button>
+        </div>
+      </section>
+    }
+  }
+</main>

@@ -1,0 +1,111 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <h1>My notes</h1>
+      <p class="sub">Only you can see these files. The tutor uses them to answer your questions.</p>
+    </div>
+  </header>
+
+  <section
+    class="drop"
+    [class.over]="dragging()"
+    (dragover)="onDragOver($event)"
+    (dragenter)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    aria-labelledby="drop-h"
+  >
+    <span class="drop-icon" aria-hidden="true"><app-icon name="cloud-upload" [size]="30" /></span>
+    <h2 id="drop-h">Drop PDF, Word, Markdown or text files</h2>
+    <p class="muted">Up to 25 MB each · or</p>
+    <input #picker id="file-input" type="file" multiple [accept]="accept" class="sr-only" (change)="onPick(picker)" tabindex="-1" aria-hidden="true" />
+    <button matButton="filled" type="button" (click)="picker.click()"><app-icon name="upload" [size]="18" /> Choose files</button>
+  </section>
+
+  @if (rejected().length) {
+    <div class="rejected" role="alert">
+      <app-icon name="alert" [size]="18" />
+      <div>
+        <p><strong>{{ rejected().length === 1 ? 'This file wasn’t added' : 'These files weren’t added' }}</strong></p>
+        <ul>
+          @for (r of rejected(); track r.name) { <li><strong>{{ r.name }}</strong> — {{ r.reason }}</li> }
+        </ul>
+      </div>
+      <button type="button" class="x" (click)="rejected.set([])" aria-label="Dismiss"><app-icon name="x" [size]="18" /></button>
+    </div>
+  }
+
+  <section class="card list" aria-labelledby="up-h">
+    <h2 id="up-h" class="card-title">Uploads</h2>
+    @switch (docs.status()) {
+      @case ('loading') { <app-skeleton [lines]="3" [heading]="false" [card]="false" label="Loading your files" /> }
+      @case ('error') { <app-error-state [error]="docs.error()" [compact]="true" title="We couldn’t load your files" (retry)="docs.load()" /> }
+      @default {
+        @if (isEmpty()) {
+          <app-empty-state [plain]="true" icon="notes" title="No notes yet" text="Upload lecture notes, cheat sheets or readings. Once they’re ready, the tutor can quote them — with page numbers." />
+        } @else {
+          <ul class="files">
+            @for (u of uploads(); track u.localId) {
+              <li class="file" [class.failed]="u.error">
+                <span class="ficon" aria-hidden="true"><app-icon [name]="icon(u.file.name)" [size]="20" /></span>
+                <div class="fbody">
+                  <div class="frow">
+                    <span class="fname">{{ u.file.name }}</span>
+                    @if (u.error) {
+                      <span class="fstate bad"><app-icon name="alert" [size]="14" /> Upload failed</span>
+                    } @else {
+                      <span class="fstate num">Uploading · {{ u.progress }}%</span>
+                    }
+                  </div>
+                  @if (u.error; as e) {
+                    <p class="fmsg">{{ e.userMessage }} <app-reference-id [referenceId]="e.referenceId" /></p>
+                    <div class="row">
+                      <button matButton="outlined" type="button" (click)="retryUpload(u)">Retry</button>
+                      <button matButton="text" type="button" (click)="dismissUpload(u)">Dismiss</button>
+                    </div>
+                  } @else {
+                    <div class="bar" role="progressbar" [attr.aria-label]="'Uploading ' + u.file.name" [attr.aria-valuenow]="u.progress" aria-valuemin="0" aria-valuemax="100">
+                      <div class="fill uploading" [style.width.%]="u.progress"></div>
+                    </div>
+                  }
+                  <p class="fmeta">{{ formatBytes(u.file.size) }}</p>
+                </div>
+              </li>
+            }
+            @for (d of docs.data() ?? []; track d.id) {
+              <li class="file" [class.failed]="d.status === 'failed'" [class.ready]="d.status === 'ready'">
+                <span class="ficon" aria-hidden="true"><app-icon [name]="icon(d.fileName)" [size]="20" /></span>
+                <div class="fbody">
+                  <div class="frow">
+                    <span class="fname">{{ d.fileName }}</span>
+                    <span class="fstate" [class.ok]="d.status === 'ready'" [class.bad]="d.status === 'failed'">
+                      @if (d.status === 'ready') { <app-icon name="check-circle" [size]="14" /> }
+                      @else if (d.status === 'failed') { <app-icon name="alert" [size]="14" /> }
+                      @else { <app-icon name="loader" [size]="14" class="spin" /> }
+                      {{ stageText(d) }}
+                    </span>
+                  </div>
+                  @if (d.status === 'failed') {
+                    <p class="fmsg">{{ d.errorMessage || 'Something went wrong while processing this file.' }} <app-reference-id [referenceId]="d.referenceId" /></p>
+                    <div class="row">
+                      <button matButton="outlined" type="button" (click)="retryDoc(d)" [disabled]="retrying().has(d.id)">{{ retrying().has(d.id) ? 'Retrying…' : 'Retry' }}</button>
+                    </div>
+                  } @else {
+                    <div class="bar" role="progressbar" [attr.aria-label]="'Processing ' + d.fileName" [attr.aria-valuenow]="d.progressPercent" aria-valuemin="0" aria-valuemax="100">
+                      <div class="fill" [class.done]="d.status === 'ready'" [style.width.%]="d.progressPercent"></div>
+                    </div>
+                  }
+                  <p class="fmeta">{{ formatBytes(d.sizeBytes) }} · added {{ d.createdAt | date: 'd MMM, HH:mm' }}</p>
+                </div>
+                <button type="button" class="del" (click)="remove(d)" [attr.aria-label]="'Delete ' + d.fileName"><app-icon name="trash" [size]="18" /></button>
+              </li>
+            }
+          </ul>
+        }
+      }
+    }
+  </section>
+
+  <p class="privacy"><app-icon name="lock" [size]="16" /> Your files are private to you and are never used to train AI models. Deleting a file removes its passages from search within a minute.</p>
+  <div class="sr-only" aria-live="polite" aria-atomic="true">{{ announce() }}</div>
+</div>

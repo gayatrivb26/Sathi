@@ -1,0 +1,251 @@
+# Production-profile rehearsal (master spec §9): run production behaviour locally.
+#
+#   docker compose -p sathi-prod -f compose.yaml -f compose.prod.yaml up -d --build
+#   docker compose -p sathi-prod -f compose.yaml -f compose.prod.yaml --profile observability up -d --build
+#
+# Differences from the base file:
+#   - SATHI_ENV=production, ASPNETCORE_ENVIRONMENT=Production, Information/INFO logging, no demo users
+#   - CPU / memory limits: whole stack incl. observability fits in ~7.7 GB
+#   - read-only root filesystems + tmpfs where the image allows it
+#   - no-new-privileges everywhere, cap_drop ALL where feasible
+#   - restart: always, 20 % trace sampling (errors and slow traces always kept)
+#   - no dev ports, no bind-mounted source; Grafana bound to 127.0.0.1 only
+#
+# Memory budget (limits):                          MiB
+#   web 128 · api 768 · jobs 512 · ai-service 1280 · ai-ingest 1280      3968
+#   postgres 1024 · minio 512 · mailpit 64                                1600
+#   otel-collector 384 · loki 512 · tempo 512 · prometheus 384 · grafana 384  2176
+#   (one-shot migrators 512 each, exit before the apps start)          ≈ 7744
+
+x-prod-env: &prod-env
+  SATHI_ENV: production
+  ASPNETCORE_ENVIRONMENT: Production
+  DOTNET_ENVIRONMENT: Production
+  Logging__LogLevel__Default: Information
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=production,service.version=${SATHI_VERSION:-0.1.0}
+
+x-prod-ai-env: &prod-ai-env
+  SATHI_ENV: production
+  LOG_LEVEL: INFO
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=production,service.version=${SATHI_VERSION:-0.1.0}
+
+x-hardening: &hardening
+  restart: always
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  web:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    environment:
+      SATHI_ENV: production
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 128M }
+
+  api:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    environment:
+      <<: *prod-env
+    deploy:
+      resources:
+        limits: { cpus: "1.00", memory: 768M }
+        reservations: { memory: 256M }
+
+  jobs:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    environment:
+      <<: *prod-env
+    deploy:
+      resources:
+        limits: { cpus: "0.75", memory: 512M }
+
+  migrator-app:
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    environment:
+      <<: *prod-env
+      SEED_DEMO_USERS: "false"
+      Seed__DemoUsers: "false"
+    deploy:
+      resources:
+        limits: { cpus: "1.00", memory: 512M }
+
+  # The AI image may download / memory-map the embedding model into its cache directory,
+  # so its root filesystem stays writable; everything else is locked down.
+  ai-service:
+    <<: *hardening
+    cap_drop: [ALL]
+    tmpfs:
+      - /tmp:size=256m
+    environment:
+      <<: *prod-ai-env
+    deploy:
+      resources:
+        limits: { cpus: "1.50", memory: 1280M }
+        reservations: { memory: 512M }
+
+  ai-ingest:
+    <<: *hardening
+    cap_drop: [ALL]
+    tmpfs:
+      - /tmp:size=512m
+    environment:
+      <<: *prod-ai-env
+    deploy:
+      resources:
+        limits: { cpus: "1.50", memory: 1280M }
+
+  migrator-ai:
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    environment:
+      <<: *prod-ai-env
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 512M }
+
+  postgres:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+      - /var/run/postgresql:size=8m
+    # The entrypoint starts as root, fixes data-dir ownership, then drops to `postgres`.
+    cap_drop: [ALL]
+    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=640MB
+      - -c
+      - work_mem=8MB
+      - -c
+      - maintenance_work_mem=128MB
+      - -c
+      - max_connections=100
+      - -c
+      - log_min_duration_statement=500
+      - -c
+      - log_lock_waits=on
+      - -c
+      - log_line_prefix=%m [%p] db=%d,user=%u,app=%a
+    deploy:
+      resources:
+        limits: { cpus: "1.50", memory: 1024M }
+        reservations: { memory: 512M }
+
+  minio:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+      - /root/.minio:size=1m
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 512M }
+
+  minio-init:
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=8m
+      - /root/.mc:size=1m
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 64M }
+
+  # Local SMTP sink kept for the rehearsal. In a real deployment set SMTP_HOST/PORT/USER/PASSWORD
+  # to the provider's relay in the secret store; api/jobs reach it over the `app` network.
+  mailpit:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits: { cpus: "0.25", memory: 64M }
+
+  otel-collector:
+    <<: *hardening
+    read_only: true
+    cap_drop: [ALL]
+    environment:
+      TRACE_SAMPLE_PERCENT: ${TRACE_SAMPLE_PERCENT:-20}
+      OTEL_MEMORY_LIMIT_MIB: "300"
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 384M }
+
+  loki:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    environment:
+      LOKI_RETENTION_PERIOD: ${LOKI_RETENTION_PERIOD:-720h}
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 512M }
+
+  tempo:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop: [ALL]
+    environment:
+      TEMPO_RETENTION: ${TEMPO_RETENTION:-168h}
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 512M }
+
+  prometheus:
+    <<: *hardening
+    read_only: true
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 384M }
+
+  grafana:
+    <<: *hardening
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    cap_drop: [ALL]
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_SECURITY_COOKIE_SECURE: ${GRAFANA_COOKIE_SECURE:-false}
+      GF_SECURITY_DISABLE_GRAVATAR: "true"
+    deploy:
+      resources:
+        limits: { cpus: "0.50", memory: 384M }

@@ -1,0 +1,54 @@
+/* Sathi - Hangfire dashboard tweaks (contract section 11.10). Embedded resource, served in the dashboard's CSS bundle. */
+
+/* Both graphs (realtime + history) are capped at about 220 px. sathi-dashboard.js wraps each canvas in .sathi-chart and turns
+   off Chart.js' fixed aspect ratio so the chart redraws at this height instead of being squashed. */
+.sathi-chart {
+    position: relative;
+    height: 220px;
+    max-height: 220px;
+    width: 100%;
+    margin-bottom: 16px;
+}
+
+.sathi-chart canvas {
+    max-height: 220px;
+}
+
+/* Auto-refresh toggle on job list pages. */
+.sathi-autorefresh {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 0 12px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: normal;
+    line-height: 1.5;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    user-select: none;
+    vertical-align: middle;
+}
+
+.sathi-autorefresh input {
+    margin: 0;
+}
+
+.sathi-autorefresh .sathi-autorefresh-state {
+    color: #777;
+}
+
+.sathi-autorefresh.is-paused .sathi-autorefresh-state {
+    color: #a94442;
+}
+
+@media (prefers-color-scheme: dark) {
+    .sathi-autorefresh {
+        border-color: #555;
+    }
+
+    .sathi-autorefresh .sathi-autorefresh-state {
+        color: #aaa;
+    }
+}

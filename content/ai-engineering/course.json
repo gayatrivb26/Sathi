@@ -1,0 +1,358 @@
+{
+  "slug": "ai-engineering",
+  "title": "AI Engineering",
+  "description": "A practical path from machine-learning foundations to production retrieval-augmented generation, written for experienced software developers who are new to ML. You will learn how models learn from a loss, how neural networks are trained with backpropagation, how attention and Transformers work, and how to build and evaluate grounded RAG systems with hybrid search and citations.",
+  "domain": "ai-engineering",
+  "concepts": [
+    {
+      "slug": "loss-functions",
+      "name": "Loss functions",
+      "description": "How a single number measures how wrong a model is: MSE and MAE for regression, cross-entropy for classification, and the difference between a loss, a metric and an objective.",
+      "prerequisites": []
+    },
+    {
+      "slug": "gradient-descent",
+      "name": "Gradient descent",
+      "description": "Minimising a loss by repeatedly stepping against the gradient; learning rates, mini-batches, epochs, momentum and Adam.",
+      "prerequisites": ["loss-functions"]
+    },
+    {
+      "slug": "regularization",
+      "name": "Overfitting and regularization",
+      "description": "Detecting overfitting with validation data and reducing it with L2/L1 penalties, weight decay, dropout, early stopping and more data.",
+      "prerequisites": ["loss-functions", "gradient-descent"]
+    },
+    {
+      "slug": "activation-functions",
+      "name": "Activation functions",
+      "description": "Why neurons need non-linearities; sigmoid, tanh, ReLU, GELU and softmax, saturation, vanishing gradients and dead ReLUs.",
+      "prerequisites": ["gradient-descent"]
+    },
+    {
+      "slug": "backpropagation",
+      "name": "Backpropagation",
+      "description": "Computing every parameter's gradient efficiently with the chain rule: a forward pass that caches values, then a backward pass in which each layer multiplies the incoming gradient by its local derivative.",
+      "prerequisites": ["gradient-descent", "activation-functions"]
+    },
+    {
+      "slug": "embeddings",
+      "name": "Embeddings",
+      "description": "Dense learned vectors for tokens and passages, embedding tables, and similarity measures: dot product, cosine similarity and Euclidean distance.",
+      "prerequisites": ["backpropagation"]
+    },
+    {
+      "slug": "attention",
+      "name": "Attention",
+      "description": "Weighted averaging of values by query-key similarity, queries/keys/values projections, masking, and scaled dot-product attention with division by the square root of d_k.",
+      "prerequisites": ["embeddings"]
+    },
+    {
+      "slug": "transformers",
+      "name": "Transformers",
+      "description": "Multi-head attention, positional information (sinusoidal, learned, RoPE), and the Transformer block with residual connections, layer normalisation and feed-forward layers.",
+      "prerequisites": ["attention", "activation-functions"]
+    },
+    {
+      "slug": "chunking",
+      "name": "Chunking",
+      "description": "Splitting documents into retrievable passages: size trade-offs, overlap, structure-aware splitting and chunk metadata for citations and filtering.",
+      "prerequisites": ["embeddings"]
+    },
+    {
+      "slug": "vector-search",
+      "name": "Vector search",
+      "description": "Finding nearest-neighbour embeddings at scale: exact search costs, approximate indexes such as HNSW and IVF, recall, pgvector and filtering.",
+      "prerequisites": ["embeddings"]
+    },
+    {
+      "slug": "hybrid-search",
+      "name": "Hybrid search and RRF",
+      "description": "Combining keyword search (BM25) with vector search and fusing their rankings with reciprocal rank fusion (k = 60), plus optional reranking.",
+      "prerequisites": ["vector-search"]
+    },
+    {
+      "slug": "rag-evaluation",
+      "name": "RAG evaluation",
+      "description": "Measuring retrieval (Recall@k, MRR, nDCG) and generation quality (groundedness, citation validity, refusals), golden datasets, calibrated LLM judges and confidence intervals.",
+      "prerequisites": ["hybrid-search", "chunking"]
+    }
+  ],
+  "modules": [
+    {
+      "title": "Foundations of machine learning",
+      "summary": "What it means for a model to learn: measuring error with a loss, minimising it with gradient descent, and making sure the result generalises beyond the training data.",
+      "lessons": [
+        {
+          "slug": "what-a-model-learns",
+          "title": "What a model learns: loss functions",
+          "summary": "Models learn whatever makes their loss small. Meet MSE, MAE and cross-entropy, and learn how a loss differs from a metric.",
+          "estimatedMinutes": 15,
+          "concepts": ["loss-functions"],
+          "objectives": [
+            "Explain the role of a loss function in training",
+            "Compute MSE, MAE and cross-entropy by hand",
+            "Choose an appropriate loss for regression and classification",
+            "Distinguish a loss from an evaluation metric"
+          ],
+          "file": "lessons/01-what-a-model-learns.md"
+        },
+        {
+          "slug": "gradient-descent",
+          "title": "Gradient descent",
+          "summary": "Follow the slope downhill: the update rule, why the learning rate matters, mini-batches, momentum and Adam.",
+          "estimatedMinutes": 15,
+          "concepts": ["gradient-descent"],
+          "objectives": [
+            "State and apply the gradient descent update rule",
+            "Predict the effect of a learning rate that is too small or too large",
+            "Explain batch, stochastic and mini-batch gradient descent",
+            "Describe what momentum and Adam add to plain gradient descent"
+          ],
+          "file": "lessons/02-gradient-descent.md"
+        },
+        {
+          "slug": "overfitting-and-regularization",
+          "title": "Overfitting and regularization",
+          "summary": "Spot overfitting with validation data, then reduce it with weight decay, L1, dropout, early stopping and more data.",
+          "estimatedMinutes": 15,
+          "concepts": ["regularization"],
+          "objectives": [
+            "Diagnose overfitting and underfitting from training and validation curves",
+            "Compute L2 and L1 penalties and their effect on weights",
+            "Explain dropout and early stopping",
+            "Avoid data leakage between splits"
+          ],
+          "file": "lessons/03-overfitting-and-regularization.md"
+        }
+      ]
+    },
+    {
+      "title": "Neural networks",
+      "summary": "From a single neuron to a trained network: non-linear activations, backpropagation with the chain rule, and the practical engineering of a training run.",
+      "lessons": [
+        {
+          "slug": "neurons-and-activation-functions",
+          "title": "Neurons and activation functions",
+          "summary": "A neuron is a weighted sum plus a non-linearity. Learn why the non-linearity matters and how sigmoid, tanh, ReLU and GELU compare.",
+          "estimatedMinutes": 15,
+          "concepts": ["activation-functions"],
+          "objectives": [
+            "Compute a neuron's output for a given activation",
+            "Explain why stacked linear layers collapse without activations",
+            "Explain saturation and vanishing gradients",
+            "Pick a suitable activation for hidden and output layers"
+          ],
+          "file": "lessons/04-neurons-and-activation-functions.md"
+        },
+        {
+          "slug": "backpropagation-and-the-chain-rule",
+          "title": "Backpropagation and the chain rule",
+          "summary": "Compute every gradient in one backward pass: each layer multiplies the incoming gradient by its local derivative, moving from the output backward.",
+          "estimatedMinutes": 20,
+          "concepts": ["backpropagation"],
+          "objectives": [
+            "Apply the chain rule through a computation graph",
+            "Run a forward and backward pass by hand on a small network",
+            "Explain why backpropagation is efficient",
+            "Connect products of local derivatives to vanishing and exploding gradients"
+          ],
+          "file": "lessons/05-backpropagation-and-the-chain-rule.md"
+        },
+        {
+          "slug": "training-neural-networks-in-practice",
+          "title": "Training neural networks in practice",
+          "summary": "The training loop, initialisation, learning-rate schedules, Adam, normalisation, gradient clipping and a checklist for debugging runs.",
+          "estimatedMinutes": 20,
+          "concepts": ["gradient-descent", "backpropagation", "regularization"],
+          "objectives": [
+            "Write and explain a standard training loop",
+            "Compute steps per epoch and plan a training budget",
+            "Explain warmup, Adam's first step and gradient clipping",
+            "Debug a training run systematically"
+          ],
+          "file": "lessons/06-training-neural-networks-in-practice.md"
+        }
+      ]
+    },
+    {
+      "title": "Attention mechanisms",
+      "summary": "How models represent tokens as vectors and let them exchange information: embeddings, attention, queries/keys/values, scaling, multiple heads, positions and the full Transformer block.",
+      "lessons": [
+        {
+          "slug": "embeddings-and-similarity",
+          "title": "Embeddings and similarity",
+          "summary": "Dense vectors that place related items close together, and the dot product, cosine and Euclidean measures used to compare them.",
+          "estimatedMinutes": 15,
+          "concepts": ["embeddings"],
+          "objectives": [
+            "Explain why embeddings beat one-hot encodings",
+            "Compute dot product, cosine similarity and Euclidean distance",
+            "Explain how sentence embeddings enable semantic search",
+            "Apply practical rules for using embedding models"
+          ],
+          "file": "lessons/07-embeddings-and-similarity.md"
+        },
+        {
+          "slug": "attention-basics",
+          "title": "Attention basics",
+          "summary": "Attention as a soft dictionary lookup: score, softmax, weighted sum — and why the scores must be scaled.",
+          "estimatedMinutes": 15,
+          "concepts": ["attention"],
+          "objectives": [
+            "Describe attention as a weighted average of values",
+            "Compute attention weights and outputs for a small example",
+            "Explain why unscaled dot-product scores saturate the softmax",
+            "Define self-attention"
+          ],
+          "file": "lessons/08-attention-basics.md"
+        },
+        {
+          "slug": "queries-keys-and-values",
+          "title": "Queries, keys and values",
+          "summary": "Three learned projections give each token a query, a key and a value; masks control which tokens can see each other.",
+          "estimatedMinutes": 20,
+          "concepts": ["attention"],
+          "objectives": [
+            "Explain the roles of queries, keys and values",
+            "Compute Q, K, V and attention outputs for two tokens",
+            "Apply causal and padding masks correctly",
+            "Distinguish self-attention from cross-attention"
+          ],
+          "file": "lessons/09-queries-keys-and-values.md"
+        },
+        {
+          "slug": "scaled-dot-product-attention",
+          "title": "Scaled dot-product attention",
+          "summary": "The full formula softmax(QK^T / sqrt(d_k)) V, why dot products grow with dimension, and how scaling prevents softmax saturation and vanishing gradients.",
+          "estimatedMinutes": 20,
+          "concepts": ["attention"],
+          "objectives": [
+            "Write the scaled dot-product attention formula and explain each part",
+            "Derive that the variance of a dot product of d unit-variance entries is d",
+            "Explain why dividing by sqrt(d_k) keeps gradients healthy",
+            "Estimate the quadratic cost of attention"
+          ],
+          "file": "lessons/10-scaled-dot-product-attention.md"
+        },
+        {
+          "slug": "multi-head-attention",
+          "title": "Multi-head attention",
+          "summary": "Several attention heads in parallel, each in its own subspace, combined by an output projection; plus KV cache sizing and grouped-query attention.",
+          "estimatedMinutes": 15,
+          "concepts": ["attention", "transformers"],
+          "objectives": [
+            "Explain why multiple heads help",
+            "Compute head dimensions and parameter counts",
+            "Describe concatenation and the output projection",
+            "Estimate KV cache size and the effect of GQA"
+          ],
+          "file": "lessons/11-multi-head-attention.md"
+        },
+        {
+          "slug": "positional-information",
+          "title": "Positional information",
+          "summary": "Attention ignores order unless we add it: sinusoidal and learned position embeddings, rotary embeddings (RoPE) and ALiBi.",
+          "estimatedMinutes": 15,
+          "concepts": ["transformers", "embeddings"],
+          "objectives": [
+            "Explain why self-attention is permutation-equivariant",
+            "Compute sinusoidal position encodings",
+            "Explain how RoPE makes scores depend on relative position",
+            "Describe the context-length limits of positional schemes"
+          ],
+          "file": "lessons/12-positional-information.md"
+        },
+        {
+          "slug": "the-transformer-block",
+          "title": "The Transformer block",
+          "summary": "Attention plus a feed-forward network, wrapped in residual connections and layer normalisation, stacked into a language model.",
+          "estimatedMinutes": 20,
+          "concepts": ["transformers"],
+          "objectives": [
+            "Describe the pre-norm Transformer block",
+            "Explain how residual connections help training",
+            "Compute layer normalisation and parameter counts",
+            "Distinguish encoder-only, decoder-only and encoder-decoder models"
+          ],
+          "file": "lessons/13-the-transformer-block.md"
+        }
+      ]
+    },
+    {
+      "title": "Retrieval-augmented generation",
+      "summary": "Grounding model answers in your own documents: chunking, vector and hybrid search with reciprocal rank fusion, and evaluating retrieval and citations.",
+      "lessons": [
+        {
+          "slug": "why-rag-grounding-answers",
+          "title": "Why RAG: grounding answers",
+          "summary": "Why models need retrieval, how a RAG pipeline works, grounding and citations, context budgets, and RAG versus fine-tuning.",
+          "estimatedMinutes": 15,
+          "concepts": ["vector-search", "rag-evaluation"],
+          "objectives": [
+            "Explain the limits of a model's built-in knowledge",
+            "Describe the indexing and answering halves of RAG",
+            "Plan a context-window budget for retrieved passages",
+            "Explain why retrieved text must be treated as data"
+          ],
+          "file": "lessons/14-why-rag-grounding-answers.md"
+        },
+        {
+          "slug": "chunking-documents",
+          "title": "Chunking documents",
+          "summary": "Split documents into passages that embed precisely and carry complete thoughts: sizes, overlap, structure-aware splitting and metadata.",
+          "estimatedMinutes": 15,
+          "concepts": ["chunking"],
+          "objectives": [
+            "Explain the chunk-size trade-off",
+            "Count chunks for a given size and overlap",
+            "Choose a chunking strategy for different document types",
+            "Store metadata that supports citations and filtering"
+          ],
+          "file": "lessons/15-chunking-documents.md"
+        },
+        {
+          "slug": "vector-search-and-hnsw",
+          "title": "Vector search and HNSW",
+          "summary": "From brute-force kNN to approximate indexes: how HNSW navigates a layered graph, its tuning knobs, IVF, pgvector and filtering.",
+          "estimatedMinutes": 20,
+          "concepts": ["vector-search"],
+          "objectives": [
+            "Estimate the memory and compute cost of exact search",
+            "Explain how HNSW search works",
+            "Tune M, ef_construction and ef_search for recall and latency",
+            "Use pgvector operators and indexes correctly"
+          ],
+          "file": "lessons/16-vector-search-and-hnsw.md"
+        },
+        {
+          "slug": "hybrid-search-and-rrf",
+          "title": "Hybrid search and reciprocal rank fusion",
+          "summary": "Combine BM25 keyword search with vector search, fuse rankings with RRF (k = 60), and optionally rerank.",
+          "estimatedMinutes": 15,
+          "concepts": ["hybrid-search"],
+          "objectives": [
+            "Explain when keyword search beats vector search and vice versa",
+            "Describe the main ideas of BM25",
+            "Compute reciprocal rank fusion scores with k = 60",
+            "Design a hybrid retrieval pipeline"
+          ],
+          "file": "lessons/17-hybrid-search-and-rrf.md"
+        },
+        {
+          "slug": "evaluating-retrieval-and-citations",
+          "title": "Evaluating retrieval and citations",
+          "summary": "Golden datasets, Recall@k, MRR and nDCG, groundedness and citation checks, calibrated LLM judges and confidence intervals.",
+          "estimatedMinutes": 20,
+          "concepts": ["rag-evaluation"],
+          "objectives": [
+            "Build a golden dataset for retrieval and answers",
+            "Compute Recall@k, MRR and nDCG",
+            "Validate citations and groundedness",
+            "Interpret evaluation results with confidence intervals"
+          ],
+          "file": "lessons/18-evaluating-retrieval-and-citations.md"
+        }
+      ]
+    }
+  ]
+}

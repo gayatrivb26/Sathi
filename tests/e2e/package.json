@@ -1,0 +1,12 @@
+{
+  "name": "sathi-e2e",
+  "private": true,
+  "description": "Playwright journeys against the real Sathi stack (compose.yaml + compose.test.yaml).",
+  "scripts": {
+    "test": "playwright test -c playwright.config.ts"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "@playwright/test": "1.64.1"
+  }
+}

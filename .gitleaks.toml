@@ -1,0 +1,17 @@
+# gitleaks configuration: default rules + a narrow allowlist for known placeholders.
+title = "sathi"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Template placeholders and CI-only dummy values"
+paths = [
+  '''\.env\.example$''',
+]
+regexes = [
+  '''__GENERATE(_BASE64|_PASSWORD)?__''',
+  '''ci-only-[a-z-]+''',
+  '''Y2ktb25seS1zZXJ2aWNlLXRva2VuLXNlY3JldC0zMi1ieXRlcyE=''',
+  '''(Demo|Teach)!12345''',
+]

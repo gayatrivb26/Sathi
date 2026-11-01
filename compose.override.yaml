@@ -1,0 +1,85 @@
+# Development overrides — loaded automatically by `docker compose up`.
+# NOT loaded when -f is used (test / prod rehearsal).
+#
+# Publishes infrastructure ports on 127.0.0.1 for local tooling and for running the
+# app code outside containers (contracts.md §1 "Local dev without containers"):
+#   Postgres 5432 · MinIO 9000 (S3) / 9001 (console) · Mailpit 1025 (SMTP) / 8025 (UI)
+#   AI service 8000 (debugging) · Grafana 3000 (observability profile)
+#
+# Containers attached only to an `internal: true` network cannot publish ports, so the
+# published services also join the dev-only `devhost` bridge.
+
+x-dev-env: &dev-env
+  SATHI_ENV: development
+  ASPNETCORE_ENVIRONMENT: Development
+  DOTNET_ENVIRONMENT: Development
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=development,service.version=${SATHI_VERSION:-0.1.0}
+
+services:
+  web:
+    environment:
+      SATHI_ENV: development
+
+  api:
+    environment:
+      <<: *dev-env
+
+  jobs:
+    environment:
+      <<: *dev-env
+
+  migrator-app:
+    environment:
+      <<: *dev-env
+      SEED_DEMO_USERS: "true"
+      Seed__DemoUsers: "true"
+
+  ai-service:
+    environment:
+      <<: *dev-env
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  ai-ingest:
+    environment:
+      <<: *dev-env
+
+  migrator-ai:
+    environment:
+      <<: *dev-env
+
+  postgres:
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks: [internal, devhost]
+
+  minio:
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    environment:
+      MINIO_BROWSER_REDIRECT: "true"
+    networks: [internal, devhost]
+
+  mailpit:
+    ports:
+      - "127.0.0.1:1025:1025"
+      - "127.0.0.1:8025:8025"
+    networks: [internal, devhost]
+
+  grafana:
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      # Dev only: no login, everyone is Admin. Never enable outside a developer laptop.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_LOG_LEVEL: info
+
+  prometheus:
+    ports:
+      - "127.0.0.1:9090:9090"
+
+networks:
+  devhost:

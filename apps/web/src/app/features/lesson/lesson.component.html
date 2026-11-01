@@ -1,0 +1,93 @@
+@if (lesson.data(); as l) {
+  <div class="readbar" role="progressbar" aria-label="Reading progress" [attr.aria-valuenow]="readPercent()" aria-valuemin="0" aria-valuemax="100">
+    <div class="readbar-fill" [style.width.%]="readPercent()"></div>
+  </div>
+}
+<div class="page">
+  @switch (lesson.status()) {
+    @case ('loading') {
+      <div class="layout">
+        <div class="stack"><app-skeleton [lines]="2" [card]="false" /><app-skeleton [lines]="10" /></div>
+        <aside class="rail"><app-skeleton [lines]="4" /></aside>
+      </div>
+    }
+    @case ('error') {
+      <app-error-state [error]="lesson.error()" [title]="lesson.error()?.code === 'NOT_FOUND' ? 'We couldn’t find this lesson' : 'We couldn’t load this lesson'" (retry)="lesson.load()" />
+    }
+    @case ('ready') {
+      @if (lesson.data(); as l) {
+        <div class="layout">
+          <div class="main-col">
+            <nav class="crumbs" aria-label="Breadcrumb">
+              <a routerLink="/course">{{ l.course.title }}</a>
+              <app-icon name="chevron-right" [size]="14" />
+              <span>Module {{ l.module.position }} · {{ l.module.title }}</span>
+            </nav>
+            <header class="lesson-head">
+              <h1>{{ l.title }}</h1>
+              <p class="meta">
+                <span>Lesson {{ l.position }} of {{ l.lessonCount }}</span>
+                <span aria-hidden="true">·</span>
+                <span><app-icon name="clock" [size]="15" /> {{ completed() ? l.estimatedMinutes + ' min' : minutesLeft() + ' min left' }}</span>
+                @if (completed()) {
+                  <span class="pill mint"><app-icon name="check" [size]="14" [strokeWidth]="3" /> Completed</span>
+                }
+              </p>
+            </header>
+
+            <section class="objectives card" aria-labelledby="obj-h">
+              <h2 id="obj-h">By the end you’ll be able to</h2>
+              <ul>
+                @for (o of l.objectives; track o) {
+                  <li><app-icon name="target" [size]="16" /> {{ o }}</li>
+                }
+              </ul>
+              @if (l.concepts.length) {
+                <p class="concepts"><span class="sr-only">Concepts: </span>
+                  @for (c of l.concepts; track c.id) { <span class="pill neutral">{{ c.name }}</span> }
+                </p>
+              }
+            </section>
+
+            <article #article class="card article" [attr.aria-label]="l.title">
+              <app-markdown [markdown]="l.contentMarkdown" />
+            </article>
+
+            <section class="end card" aria-labelledby="end-h">
+              <h2 id="end-h">{{ completed() ? 'Nice work — lesson complete' : 'Finished reading?' }}</h2>
+              <p class="muted">Lock it in with a short check, or ask the tutor about anything that felt fuzzy.</p>
+              <div class="row">
+                <button matButton="filled" type="button" (click)="checkUnderstanding()" [disabled]="starting()">
+                  <app-icon name="check-circle" [size]="18" /> {{ starting() ? 'Preparing…' : 'Check your understanding' }}
+                </button>
+                <a matButton="outlined" routerLink="/tutor" [queryParams]="{ lessonId: l.id }"><app-icon name="tutor" [size]="18" /> Ask the tutor about this lesson</a>
+                @if (!completed()) {
+                  <button matButton="text" type="button" (click)="markComplete()">Mark as complete</button>
+                }
+              </div>
+            </section>
+
+            <nav class="pager" aria-label="Lessons">
+              @if (l.previousLessonId) {
+                <a class="pg prev" [routerLink]="['/lessons', l.previousLessonId]"><app-icon name="arrow-left" [size]="18" /><span><small>Previous</small>Previous lesson</span></a>
+              } @else { <span></span> }
+              @if (l.nextLessonId) {
+                <a class="pg next" [routerLink]="['/lessons', l.nextLessonId]"><span><small>Next</small>Next lesson</span><app-icon name="arrow-right" [size]="18" /></a>
+              }
+            </nav>
+          </div>
+
+          <aside class="rail" aria-label="Lesson tools">
+            <div class="card rail-card">
+              <p class="eyebrow">Your progress</p>
+              <p class="big num">{{ readPercent() }}%</p>
+              <div class="bar" aria-hidden="true"><div class="fill" [style.width.%]="readPercent()"></div></div>
+              <a matButton="filled" class="full" routerLink="/tutor" [queryParams]="{ lessonId: l.id }"><app-icon name="sparkles" [size]="18" /> Ask the tutor</a>
+              <button matButton="outlined" class="full" type="button" (click)="checkUnderstanding()" [disabled]="starting()">Check your understanding</button>
+            </div>
+          </aside>
+        </div>
+      }
+    }
+  }
+</div>

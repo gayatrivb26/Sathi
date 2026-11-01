@@ -1,0 +1,526 @@
+# Sathi — base Compose file (production-shaped).
+#
+#   docker compose up -d --build                         # dev (compose.override.yaml auto-loads)
+#   docker compose --profile observability up -d         # + OTel Collector, Loki, Tempo, Prometheus, Grafana
+#   docker compose -f compose.yaml -f compose.test.yaml up -d --build   # CI / E2E (fake AI providers)
+#   docker compose -f compose.yaml -f compose.prod.yaml up -d --build   # production-profile rehearsal
+#
+# Contract: docs/architecture/contracts.md §1 (services, ports, networks) and §2 (config keys).
+# Only `web` is published. Postgres, MinIO and the AI service are never published here.
+name: sathi
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-restart: &restart-policy unless-stopped
+
+# Shared non-secret metadata for every application container.
+x-app-common-env: &app-common-env
+  SATHI_ENV: ${SATHI_ENV:-production}
+  SATHI_VERSION: ${SATHI_VERSION:-0.1.0}
+  LOG_HASH_SALT: ${LOG_HASH_SALT:?LOG_HASH_SALT is required (run scripts/generate-secrets)}
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  OTEL_TRACES_SAMPLER: parentbased_always_on
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=${SATHI_ENV:-production},service.version=${SATHI_VERSION:-0.1.0}
+
+# .NET configuration (contracts.md §2 ".NET", §11). Compose maps the shared .env values onto these keys.
+# Shared by api, jobs and migrator-app. The migrator gets no signing key and no storage credentials.
+x-dotnet-env: &dotnet-env
+  <<: *app-common-env
+  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+  DOTNET_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+  ASPNETCORE_HTTP_PORTS: "8080"
+  DOTNET_gcServer: "0"
+  ConnectionStrings__App: Host=postgres;Port=5432;Database=sathi;Username=sathi_app;Password=${APP_DB_PASSWORD:?APP_DB_PASSWORD is required}
+  Ai__BaseUrl: http://ai-service:8000
+  Ai__IngestBaseUrl: http://ai-ingest:8000
+  Ai__TimeoutSeconds: "120"
+  Email__Host: ${SMTP_HOST:-mailpit}
+  Email__Port: ${SMTP_PORT:-1025}
+  Email__From: ${SMTP_FROM:-Sathi <no-reply@sathi.local>}
+  Email__User: ${SMTP_USER:-}
+  Email__Password: ${SMTP_PASSWORD:-}
+  App__BaseUrl: ${APP_BASE_URL:-http://localhost:8080}
+  Logging__HashSalt: ${LOG_HASH_SALT}
+  Quotas__ChatMessagesPerDay: ${QUOTA_CHAT_MESSAGES_PER_DAY:-200}
+  Quotas__WebSearchesPerDay: ${QUOTA_WEB_SEARCHES_PER_DAY:-20}
+  Quotas__UploadsPerDay: ${QUOTA_UPLOADS_PER_DAY:-20}
+  Quotas__MaxUploadBytes: "26214400"
+  Quotas__MaxStorageBytesPerUser: "209715200"
+  Grading__AutoAcceptConfidence: ${GRADING_AUTO_ACCEPT_CONFIDENCE:-0.75}
+  Observability__SlowQueryMs: ${SLOW_QUERY_MS:-500}
+  Observability__GrafanaUrl: ${GRAFANA_PUBLIC_URL:-http://localhost:3000}
+
+# api + jobs only: RS256 signing key (contracts §11.7, ADR 0015), the app storage user
+# (§11.8, ADR 0016), privacy / under-18 settings (§11.4, ADR 0014) and tutor recovery (§11.5).
+x-dotnet-runtime-env: &dotnet-runtime-env
+  <<: *dotnet-env
+  ServiceToken__PrivateKeyPem: ${SERVICE_TOKEN_PRIVATE_KEY_PEM_B64:?SERVICE_TOKEN_PRIVATE_KEY_PEM_B64 is required (run scripts/generate-secrets --add-missing)}
+  ServiceToken__KeyId: ${SERVICE_TOKEN_KEY_ID:-k1}
+  Storage__Endpoint: http://minio:9000
+  Storage__AccessKey: ${STORAGE_APP_ACCESS_KEY:?STORAGE_APP_ACCESS_KEY is required (run scripts/generate-secrets --add-missing)}
+  Storage__SecretKey: ${STORAGE_APP_SECRET_KEY:?STORAGE_APP_SECRET_KEY is required (run scripts/generate-secrets --add-missing)}
+  Storage__Bucket: sathi-documents
+  Storage__UseSsl: "false"
+  Privacy__MinimumAge: ${PRIVACY_MINIMUM_AGE:-8}
+  Privacy__AgeOfMajority: ${PRIVACY_AGE_OF_MAJORITY:-18}
+  Privacy__ConsentPolicyVersion: ${PRIVACY_CONSENT_POLICY_VERSION:-2026-10-22}
+  Tutor__StaleStreamMinutes: ${TUTOR_STALE_STREAM_MINUTES:-3}
+
+# Python configuration (contracts.md §2 "Python", §11.7). Shared by ai-service, ai-ingest and
+# migrator-ai. The AI side holds only the PUBLIC verification key(s), never a signing key.
+x-ai-env: &ai-env
+  <<: *app-common-env
+  DATABASE_URL: postgresql+psycopg://sathi_ai:${AI_DB_PASSWORD:?AI_DB_PASSWORD is required}@postgres:5432/sathi
+  # Comma-separated kid:base64(SPKI PEM) entries; append the previous key during a rotation.
+  SERVICE_TOKEN_PUBLIC_KEYS: ${SERVICE_TOKEN_KEY_ID:-k1}:${SERVICE_TOKEN_PUBLIC_KEY_PEM_B64:?SERVICE_TOKEN_PUBLIC_KEY_PEM_B64 is required (run scripts/generate-secrets --add-missing)}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  AI_INSTANCE_ROLE: all
+  INGEST_CONCURRENCY: "2"
+  PROMPTS_DIR: /app/prompts
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  LLM_PROVIDER: ${LLM_PROVIDER:-fake}
+  LLM_MODEL: ${LLM_MODEL:-claude-opus-5-5}
+  LLM_FALLBACK_MODEL: ${LLM_FALLBACK_MODEL:-claude-sonnet-5-5}
+  LLM_DAILY_SPEND_CAP_USD: ${LLM_DAILY_SPEND_CAP_USD:-5}
+  AI_KILL_SWITCH: ${AI_KILL_SWITCH:-false}
+  EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-fastembed}
+  EMBEDDING_MODEL: ${EMBEDDING_MODEL:-BAAI/bge-small-en-v1.5}
+  SEARCH_PROVIDER: ${SEARCH_PROVIDER:-none}
+  TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+  BRAVE_API_KEY: ${BRAVE_API_KEY:-}
+  WEB_SEARCH_DAILY_SPEND_CAP_USD: ${WEB_SEARCH_DAILY_SPEND_CAP_USD:-1}
+
+# ai-service + ai-ingest only: the AI storage user (contracts §11.8, ADR 0016).
+x-ai-runtime-env: &ai-runtime-env
+  <<: *ai-env
+  STORAGE_ENDPOINT: http://minio:9000
+  STORAGE_ACCESS_KEY: ${STORAGE_AI_ACCESS_KEY:?STORAGE_AI_ACCESS_KEY is required (run scripts/generate-secrets --add-missing)}
+  STORAGE_SECRET_KEY: ${STORAGE_AI_SECRET_KEY:?STORAGE_AI_SECRET_KEY is required (run scripts/generate-secrets --add-missing)}
+  STORAGE_BUCKET: sathi-documents
+
+x-ai-build: &ai-build
+  context: .
+  dockerfile: services/ai-service/Dockerfile
+
+x-ai-healthcheck: &ai-healthcheck
+  test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live', timeout=3)"]
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 120s
+  start_interval: 3s
+
+x-dotnet-healthcheck: &dotnet-healthcheck
+  test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://127.0.0.1:8080/health/live"]
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 90s
+  start_interval: 3s
+
+services:
+  # ---------------------------------------------------------------- edge
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: ${SATHI_IMAGE_PREFIX:-sathi}/web:${SATHI_IMAGE_TAG:-local}
+    restart: *restart-policy
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    networks: [public, app]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/nginx-health 2>/dev/null || curl -fsS -o /dev/null http://127.0.0.1:8080/nginx-health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    logging: *default-logging
+
+  # ---------------------------------------------------------------- .NET
+  api:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+    image: ${SATHI_IMAGE_PREFIX:-sathi}/api:${SATHI_IMAGE_TAG:-local}
+    restart: *restart-policy
+    environment:
+      <<: *dotnet-runtime-env
+      OTEL_SERVICE_NAME: api
+      # Hangfire *client* only: the API enqueues jobs into the shared storage. The schema is
+      # created by the jobs host, so the API waits for it to be healthy.
+      ConnectionStrings__Hangfire: Host=postgres;Port=5432;Database=sathi;Username=sathi_hangfire;Password=${HANGFIRE_DB_PASSWORD:?HANGFIRE_DB_PASSWORD is required}
+    networks: [app, internal, observability]
+    depends_on:
+      jobs:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      migrator-app:
+        condition: service_completed_successfully
+      migrator-ai:
+        condition: service_completed_successfully
+      ai-service:
+        condition: service_healthy
+    healthcheck: *dotnet-healthcheck
+    logging: *default-logging
+
+  jobs:
+    build:
+      context: .
+      dockerfile: services/jobs/Dockerfile
+    image: ${SATHI_IMAGE_PREFIX:-sathi}/jobs:${SATHI_IMAGE_TAG:-local}
+    restart: *restart-policy
+    environment:
+      <<: *dotnet-runtime-env
+      OTEL_SERVICE_NAME: jobs
+      ConnectionStrings__Hangfire: Host=postgres;Port=5432;Database=sathi;Username=sathi_hangfire;Password=${HANGFIRE_DB_PASSWORD:?HANGFIRE_DB_PASSWORD is required}
+    networks: [app, internal, observability]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      migrator-app:
+        condition: service_completed_successfully
+      migrator-ai:
+        condition: service_completed_successfully
+      ai-service:
+        condition: service_healthy
+      ai-ingest:
+        condition: service_healthy
+    healthcheck: *dotnet-healthcheck
+    logging: *default-logging
+
+  migrator-app:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile.migrator
+    image: ${SATHI_IMAGE_PREFIX:-sathi}/migrator-app:${SATHI_IMAGE_TAG:-local}
+    restart: "no"
+    environment:
+      <<: *dotnet-env
+      OTEL_SERVICE_NAME: migrator-app
+      Seed__ContentPath: /app/content/ai-engineering
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:?SEED_ADMIN_EMAIL is required}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?SEED_ADMIN_PASSWORD is required}
+      SEED_DEMO_USERS: ${SEED_DEMO_USERS:-false}
+      Seed__AdminEmail: ${SEED_ADMIN_EMAIL}
+      Seed__AdminPassword: ${SEED_ADMIN_PASSWORD}
+      Seed__DemoUsers: ${SEED_DEMO_USERS:-false}
+    networks: [internal]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+
+  # ---------------------------------------------------------------- Python AI
+  ai-service:
+    build: *ai-build
+    image: ${SATHI_IMAGE_PREFIX:-sathi}/ai-service:${SATHI_IMAGE_TAG:-local}
+    restart: *restart-policy
+    environment:
+      <<: *ai-runtime-env
+      OTEL_SERVICE_NAME: ai-service
+    networks: [internal, egress, observability]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      migrator-ai:
+        condition: service_completed_successfully
+    healthcheck: *ai-healthcheck
+    logging: *default-logging
+
+  ai-ingest:
+    build: *ai-build
+    image: ${SATHI_IMAGE_PREFIX:-sathi}/ai-service:${SATHI_IMAGE_TAG:-local}
+    restart: *restart-policy
+    environment:
+      <<: *ai-runtime-env
+      OTEL_SERVICE_NAME: ai-ingest
+      AI_INSTANCE_ROLE: ingest
+      INGEST_CONCURRENCY: "2"
+    networks: [internal, egress, observability]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      migrator-ai:
+        condition: service_completed_successfully
+    healthcheck: *ai-healthcheck
+    logging: *default-logging
+
+  migrator-ai:
+    build: *ai-build
+    image: ${SATHI_IMAGE_PREFIX:-sathi}/ai-service:${SATHI_IMAGE_TAG:-local}
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    environment:
+      <<: *ai-env
+      OTEL_SERVICE_NAME: migrator-ai
+    networks: [internal]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+
+  # ---------------------------------------------------------------- data
+  postgres:
+    image: ${POSTGRES_IMAGE:-pgvector/pgvector:0.8.0-pg17}
+    restart: *restart-policy
+    environment:
+      POSTGRES_DB: sathi
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256 --auth-local=scram-sha-256
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      AI_DB_PASSWORD: ${AI_DB_PASSWORD}
+      HANGFIRE_DB_PASSWORD: ${HANGFIRE_DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    command:
+      - postgres
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - log_min_duration_statement=${PG_LOG_MIN_DURATION_MS:-500}
+      - -c
+      - log_lock_waits=on
+      - -c
+      - log_line_prefix=%m [%p] db=%d,user=%u,app=%a
+      - -c
+      - max_connections=150
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    networks: [internal]
+    healthcheck:
+      # TCP check on purpose: during initdb the server only listens on the unix socket,
+      # so this stays unhealthy until init scripts have finished and the real server is up.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 5432 -U postgres -d sathi"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+      start_interval: 2s
+    shm_size: 256m
+    logging: *default-logging
+
+  # The upstream minio/minio and minio/mc images are no longer published on Docker Hub;
+  # pgsty/minio + pgsty/mc are the maintained community builds of the same server/client.
+  # Override with MINIO_IMAGE / MINIO_MC_IMAGE (e.g. a mirror in your own registry).
+  minio:
+    image: ${MINIO_IMAGE:-pgsty/minio:RELEASE.2026-08-04T00-00-00Z}
+    restart: *restart-policy
+    command: ["server", "/data", "--address", ":9000", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_BROWSER_REDIRECT: "false"
+    volumes:
+      - minio-data:/data
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+      start_interval: 2s
+    logging: *default-logging
+
+  # Bucket + per-service users/policies (contracts §11.8, ADR 0016). The root credentials exist
+  # only here and in `minio`; api/jobs and ai-service/ai-ingest get their own scoped users.
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-pgsty/mc:RELEASE.2026-09-16T00-00-00Z}
+    restart: "no"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      STORAGE_BUCKET: sathi-documents
+      STORAGE_APP_ACCESS_KEY: ${STORAGE_APP_ACCESS_KEY:?STORAGE_APP_ACCESS_KEY is required (run scripts/generate-secrets --add-missing)}
+      STORAGE_APP_SECRET_KEY: ${STORAGE_APP_SECRET_KEY:?STORAGE_APP_SECRET_KEY is required (run scripts/generate-secrets --add-missing)}
+      STORAGE_AI_ACCESS_KEY: ${STORAGE_AI_ACCESS_KEY:?STORAGE_AI_ACCESS_KEY is required (run scripts/generate-secrets --add-missing)}
+      STORAGE_AI_SECRET_KEY: ${STORAGE_AI_SECRET_KEY:?STORAGE_AI_SECRET_KEY is required (run scripts/generate-secrets --add-missing)}
+      POLICY_DIR: /policies
+    entrypoint: ["/bin/sh", "/policies/init.sh"]
+    volumes:
+      - ./infrastructure/docker/minio:/policies:ro
+    networks: [internal]
+    depends_on:
+      minio:
+        condition: service_healthy
+    logging: *default-logging
+
+  mailpit:
+    image: ${MAILPIT_IMAGE:-axllent/mailpit:v1.24.1}
+    restart: *restart-policy
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "true"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "true"
+      MP_MAX_MESSAGES: "2000"
+    networks: [internal]
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+
+  # ---------------------------------------------------------------- observability (profile)
+  otel-collector:
+    image: ${OTEL_COLLECTOR_IMAGE:-otel/opentelemetry-collector-contrib:0.120.0}
+    profiles: [observability]
+    restart: *restart-policy
+    command: ["--config=/etc/otelcol/config.yaml"]
+    environment:
+      TRACE_SAMPLE_PERCENT: ${TRACE_SAMPLE_PERCENT:-100}
+      OTEL_MEMORY_LIMIT_MIB: ${OTEL_MEMORY_LIMIT_MIB:-400}
+    volumes:
+      - ./infrastructure/monitoring/otel-collector/config.yaml:/etc/otelcol/config.yaml:ro
+    networks: [observability]
+    depends_on:
+      loki:
+        condition: service_healthy
+      tempo:
+        condition: service_started
+    logging: *default-logging
+
+  loki:
+    image: ${LOKI_IMAGE:-grafana/loki:3.4.2}
+    profiles: [observability]
+    restart: *restart-policy
+    command: ["-config.file=/etc/loki/config.yaml", "-config.expand-env=true"]
+    environment:
+      LOKI_RETENTION_PERIOD: ${LOKI_RETENTION_PERIOD:-168h}
+    volumes:
+      - ./infrastructure/monitoring/loki/config.yaml:/etc/loki/config.yaml:ro
+      - loki-data:/loki
+    networks: [observability]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3100/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 120s
+      start_interval: 3s
+    logging: *default-logging
+
+  tempo:
+    image: ${TEMPO_IMAGE:-grafana/tempo:2.7.1}
+    profiles: [observability]
+    restart: *restart-policy
+    command: ["-config.file=/etc/tempo/config.yaml", "-config.expand-env=true"]
+    environment:
+      TEMPO_RETENTION: ${TEMPO_RETENTION:-72h}
+    volumes:
+      - ./infrastructure/monitoring/tempo/config.yaml:/etc/tempo/config.yaml:ro
+      - tempo-data:/var/tempo
+    networks: [observability]
+    depends_on:
+      tempo-init:
+        condition: service_completed_successfully
+    logging: *default-logging
+
+  # Tempo runs as uid 10001 but a fresh named volume is root-owned; fix ownership once.
+  tempo-init:
+    image: ${TEMPO_IMAGE:-grafana/tempo:2.7.1}
+    profiles: [observability]
+    restart: "no"
+    user: root
+    entrypoint: ["chown", "-R", "10001:10001", "/var/tempo"]
+    volumes:
+      - tempo-data:/var/tempo
+    network_mode: none
+    logging: *default-logging
+
+  prometheus:
+    image: ${PROMETHEUS_IMAGE:-prom/prometheus:v3.2.1}
+    profiles: [observability]
+    restart: *restart-policy
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}
+      - --web.enable-remote-write-receiver
+      - --web.enable-lifecycle
+    volumes:
+      - ./infrastructure/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infrastructure/monitoring/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    networks: [observability]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:9090/-/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    logging: *default-logging
+
+  grafana:
+    image: ${GRAFANA_IMAGE:-grafana/grafana:11.5.2}
+    profiles: [observability]
+    restart: *restart-policy
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD is required}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_SERVER_ROOT_URL: ${GRAFANA_PUBLIC_URL:-http://localhost:3000}
+      GF_FEATURE_TOGGLES_ENABLE: traceqlEditor
+      GF_LOG_MODE: console
+      GF_LOG_LEVEL: warn
+    volumes:
+      - ./infrastructure/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infrastructure/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    networks: [observability]
+    depends_on:
+      loki:
+        condition: service_healthy
+      prometheus:
+        condition: service_healthy
+      tempo:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 180s
+      start_interval: 3s
+    logging: *default-logging
+
+networks:
+  # Edge: the only network with a published port (web:8080).
+  public:
+  # web <-> api/jobs. Not internal: api/jobs reach an external SMTP relay through it in production.
+  app:
+  # Data plane. No route to the outside world.
+  internal:
+    internal: true
+  # Outbound HTTPS for the AI containers only (Anthropic, Tavily/Brave, model download).
+  egress:
+  # Telemetry: apps -> otel-collector -> loki/tempo/prometheus <- grafana.
+  observability:
+
+volumes:
+  postgres-data:
+  minio-data:
+  grafana-data:
+  loki-data:
+  tempo-data:
+  prometheus-data:

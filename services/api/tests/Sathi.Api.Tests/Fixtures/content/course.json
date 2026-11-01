@@ -1,0 +1,28 @@
+{
+  "slug": "test-course",
+  "title": "Test Course",
+  "description": "A small fixture course for integration tests.",
+  "domain": "testing",
+  "concepts": [
+    { "slug": "gradient-descent", "name": "Gradient descent", "description": "Stepping against the gradient.", "prerequisites": [] },
+    { "slug": "embeddings", "name": "Embeddings", "description": "Dense vectors.", "prerequisites": ["gradient-descent"] },
+    { "slug": "attention", "name": "Attention", "description": "Weighted averages.", "prerequisites": ["embeddings"] }
+  ],
+  "modules": [
+    {
+      "title": "Foundations",
+      "summary": "How models learn.",
+      "lessons": [
+        { "slug": "gd", "title": "Gradient descent", "summary": "Downhill steps.", "estimatedMinutes": 12, "concepts": ["gradient-descent"], "objectives": ["Explain a gradient step"], "file": "lessons/01-gd.md" }
+      ]
+    },
+    {
+      "title": "Representations",
+      "summary": "Vectors and attention.",
+      "lessons": [
+        { "slug": "emb", "title": "Embeddings", "summary": "Vectors for meaning.", "estimatedMinutes": 10, "concepts": ["embeddings"], "objectives": ["Compute cosine similarity"], "file": "lessons/02-emb.md" },
+        { "slug": "att", "title": "Attention", "summary": "Queries, keys, values.", "estimatedMinutes": 15, "concepts": ["attention", "embeddings"], "objectives": ["Describe attention weights", "Explain scaling"], "file": "lessons/03-att.md" }
+      ]
+    }
+  ]
+}

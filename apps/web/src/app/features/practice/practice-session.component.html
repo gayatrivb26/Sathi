@@ -1,0 +1,99 @@
+<div class="page">
+  @switch (attempt.status()) {
+    @case ('loading') {
+      <app-skeleton [lines]="1" [card]="false" />
+      <div class="layout" style="margin-top: 20px"><app-skeleton [lines]="6" /><app-skeleton [lines]="3" /></div>
+    }
+    @case ('error') {
+      <app-error-state [error]="attempt.error()" title="We couldn’t load this quiz" (retry)="attempt.load()" />
+    }
+    @case ('ready') {
+      @if (question(); as q) {
+        <header class="head">
+          <div>
+            <p class="eyebrow">{{ attempt.data()?.kind === 'lesson_check' ? 'Lesson check' : 'Practice' }}</p>
+            <h1>{{ heading() }}</h1>
+          </div>
+          <p class="count num" aria-live="polite">Question {{ index() + 1 }} of {{ total() }}</p>
+        </header>
+        <div class="bar progress" role="progressbar" aria-label="Quiz progress" [attr.aria-valuenow]="index() + (result() ? 1 : 0)" aria-valuemin="0" [attr.aria-valuemax]="total()">
+          <div class="fill" [style.width.%]="progress()"></div>
+        </div>
+
+        <div class="layout">
+          <section class="card qcard" aria-label="Question">
+            <span class="concept pill neutral">{{ q.conceptName }}</span>
+            <app-question-card [question]="q" [reveal]="result() && result()!.correctOptionId ? result() : null" [busy]="submitting()" (answer)="answer($event)" [hideSubmit]="!!result()" />
+            @if (q.type === 'short' && result()) {
+              <p class="submitted"><app-icon name="check" [size]="16" /> Answer submitted</p>
+            }
+            @if (answerError(); as e) {
+              <app-error-state [error]="e" title="Your answer wasn’t saved" [compact]="true" [retryable]="false" />
+            }
+          </section>
+
+          <aside class="card side" aria-live="polite">
+            @if (!result()) {
+              <div class="tips">
+                <span class="tip-icon" aria-hidden="true"><app-icon name="lightbulb" [size]="22" /></span>
+                <h2>Take your time</h2>
+                <p class="muted">Pick the answer you believe is right — guessing hides what you still need to learn. Stuck? Ask the tutor for a hint; it won’t give the answer away.</p>
+                <a matButton="outlined" routerLink="/tutor" [queryParams]="tutorQuery()"><app-icon name="tutor" [size]="18" /> Ask the tutor</a>
+              </div>
+            } @else if (result(); as r) {
+              @if (r.grading?.status === 'pending') {
+                <div class="grading" role="status">
+                  <app-icon name="loader" [size]="28" class="spin" />
+                  <h2>Grading…</h2>
+                  <p class="muted">Your answer is being checked against the rubric. This usually takes a few seconds.</p>
+                  @if (gradingSlow()) {
+                    <p class="muted small">This is taking longer than usual. You can carry on — your mastery updates when grading finishes.</p>
+                  }
+                </div>
+              } @else if (r.grading?.status === 'needs_review') {
+                <div class="verdict review">
+                  <app-icon name="teach" [size]="20" />
+                  <h2>Your teacher will review this</h2>
+                </div>
+                <p class="muted">The automatic grader wasn’t confident enough, so a person will mark it. We’ll update your mastery once it’s reviewed.</p>
+                <h3 class="why">What a strong answer covers</h3>
+                <p>{{ r.explanation }}</p>
+              } @else if (r.grading) {
+                <div class="verdict" [class.ok]="r.isCorrect">
+                  <app-icon [name]="r.isCorrect ? 'check-circle' : 'alert'" [size]="20" />
+                  <h2>Score {{ r.grading.score }} / {{ r.grading.maxScore }}</h2>
+                </div>
+                @if (r.grading.feedback) { <p>{{ r.grading.feedback }}</p> }
+                <h3 class="why">Model explanation</h3>
+                <p class="muted">{{ r.explanation }}</p>
+              } @else {
+                <div class="verdict" [class.ok]="r.isCorrect">
+                  <app-icon [name]="r.isCorrect ? 'check-circle' : 'x-circle'" [size]="20" />
+                  <h2>{{ r.isCorrect ? 'Correct' : 'Not quite' }}</h2>
+                </div>
+                <h3 class="why">Why {{ correctLabel() }}</h3>
+                <p>{{ r.explanation }}</p>
+              }
+
+              @if (r.mastery; as m) {
+                <app-mastery-change class="mchange" [name]="m.name" [before]="m.before" [after]="m.after" />
+              }
+
+              @if (!pending() || gradingSlow()) {
+                <div class="row actions">
+                  <button #nextBtn matButton="filled" type="button" (click)="next()" [disabled]="finishing()">
+                    {{ isLast() ? (finishing() ? 'Finishing…' : 'See summary') : 'Next question' }}
+                  </button>
+                  <a matButton="outlined" routerLink="/tutor" [queryParams]="tutorQuery()">Ask the tutor</a>
+                </div>
+              }
+            }
+          </aside>
+        </div>
+      } @else {
+        <app-error-state title="This quiz has no questions" [retryable]="false" />
+      }
+    }
+  }
+  <div class="sr-only" aria-live="assertive">{{ announce() }}</div>
+</div>

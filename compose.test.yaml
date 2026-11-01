@@ -1,0 +1,86 @@
+# CI / E2E profile: deterministic fake AI providers, throw-away data, no observability.
+#
+#   docker compose -p sathi-test -f compose.yaml -f compose.test.yaml up -d --build --wait
+#   docker compose -p sathi-test -f compose.yaml -f compose.test.yaml down -v
+#
+# Do not combine with --profile observability.
+
+x-test-env: &test-env
+  SATHI_ENV: test
+  ASPNETCORE_ENVIRONMENT: Test
+  DOTNET_ENVIRONMENT: Test
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  OTEL_RESOURCE_ATTRIBUTES: deployment.environment.name=test,service.version=${SATHI_VERSION:-0.1.0}
+
+x-test-ai-env: &test-ai-env
+  <<: *test-env
+  LLM_PROVIDER: fake
+  EMBEDDING_PROVIDER: fake
+  SEARCH_PROVIDER: fake
+  ANTHROPIC_API_KEY: ""
+  TAVILY_API_KEY: ""
+  BRAVE_API_KEY: ""
+  LOG_LEVEL: DEBUG
+
+services:
+  web:
+    environment:
+      SATHI_ENV: test
+
+  api:
+    environment:
+      <<: *test-env
+
+  jobs:
+    environment:
+      <<: *test-env
+
+  migrator-app:
+    environment:
+      <<: *test-env
+      # E2E journeys sign in as the demo student / instructor.
+      SEED_DEMO_USERS: "true"
+      Seed__DemoUsers: "true"
+
+  ai-service:
+    environment:
+      <<: *test-ai-env
+
+  ai-ingest:
+    environment:
+      <<: *test-ai-env
+
+  migrator-ai:
+    environment:
+      <<: *test-ai-env
+
+  postgres:
+    # Data lives in RAM and disappears with the container.
+    volumes: !override
+      - ./infrastructure/docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    tmpfs:
+      - /var/lib/postgresql/data:size=1g
+    command:
+      - postgres
+      - -c
+      - fsync=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - full_page_writes=off
+      - -c
+      - log_min_duration_statement=500
+
+  minio:
+    volumes: !override []
+    tmpfs:
+      - /data:size=512m
+
+  mailpit:
+    # Playwright reads verification e-mails through the Mailpit API (http://localhost:8025/api/v1/...).
+    ports:
+      - "127.0.0.1:8025:8025"
+    networks: [internal, testhost]
+
+networks:
+  testhost:

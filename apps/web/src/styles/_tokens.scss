@@ -1,0 +1,132 @@
+// Sathi design tokens (master spec §23). Light is the default; dark follows the OS
+// unless the user picks a theme in Settings (html[data-theme]).
+
+@mixin light-tokens {
+  color-scheme: light;
+  --bg: #f4f6fb;
+  --surface: #ffffff;
+  --surface-2: #f6f7fc;
+  --surface-3: #eceff7;
+  --ink: #12192b;
+  --muted: #4a5470;
+  --border: #e1e4ef;
+  --border-input: #8a92ab; // ≥ 3:1 against white (WCAG 1.4.11)
+  --track: #e4e7f2;
+
+  --primary: #4b3fe4;
+  --primary-hover: #3f33d6;
+  --on-primary: #ffffff;
+  --primary-ink: #4b3fe4; // primary used as text on surfaces
+  --primary-soft: #ecebff;
+  --primary-soft-ink: #3528c9;
+  --hero-from: #4b3fe4;
+  --hero-to: #6a3fe0;
+
+  --amber: #ffb547;
+  --amber-bar: #e0861a;
+  --amber-ink: #8f4c00; // amber as text: 5.9:1 on white
+  --amber-soft: #fff2de;
+  --on-amber: #12192b;
+
+  --mint: #0f7b63;
+  --mint-bar: #0f7b63;
+  --mint-ink: #0c6a55;
+  --mint-soft: #e2f4ee;
+
+  --danger: #b42318;
+  --danger-soft: #fdeceb;
+
+  --web: #0b6aa2;
+  --web-soft: #e3f1fa;
+  --upload: #7a3fb0;
+  --upload-soft: #f2e9fb;
+
+  --sidebar-bg: #12192b;
+  --sidebar-ink: #c9cfe0;
+  --sidebar-muted: #8d96b3;
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+
+  --focus-ring: #4b3fe4;
+  --shadow-card: 0 1px 2px rgba(18, 25, 43, 0.04), 0 6px 20px rgba(18, 25, 43, 0.05);
+  --shadow-pop: 0 10px 40px rgba(18, 25, 43, 0.18);
+  --skeleton: #e7eaf3;
+  --skeleton-shine: #f3f5fa;
+}
+
+@mixin dark-tokens {
+  color-scheme: dark;
+  --bg: #0b1020;
+  --surface: #141b2e;
+  --surface-2: #1a2238;
+  --surface-3: #232c46;
+  --ink: #e9ecf6;
+  --muted: #a9b1c9;
+  --border: #29324d;
+  --border-input: #66718f;
+  --track: #2a3350;
+
+  --primary: #5d52f2;
+  --primary-hover: #6d63f6;
+  --on-primary: #ffffff;
+  --primary-ink: #aaa4ff;
+  --primary-soft: #262463;
+  --primary-soft-ink: #d3d0ff;
+  --hero-from: #3d32c9;
+  --hero-to: #5a2fc0;
+
+  --amber: #ffb547;
+  --amber-bar: #f0a030;
+  --amber-ink: #ffc56b;
+  --amber-soft: #3a2a12;
+  --on-amber: #12192b;
+
+  --mint: #2fbf98;
+  --mint-bar: #2aa985;
+  --mint-ink: #5fd9b6;
+  --mint-soft: #11322b;
+
+  --danger: #ff8a80;
+  --danger-soft: #3b1b1d;
+
+  --web: #6cc3f5;
+  --web-soft: #12304a;
+  --upload: #d1a6ff;
+  --upload-soft: #2e2142;
+
+  --sidebar-bg: #070b16;
+  --sidebar-ink: #c9cfe0;
+  --sidebar-muted: #8d96b3;
+  --sidebar-hover: rgba(255, 255, 255, 0.06);
+
+  --focus-ring: #aaa4ff;
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
+  --shadow-pop: 0 10px 40px rgba(0, 0, 0, 0.5);
+  --skeleton: #1f2740;
+  --skeleton-shine: #2a3352;
+}
+
+:root {
+  --radius: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+  --font-body: 'DM Sans Variable', 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-head: 'Space Grotesk Variable', 'Space Grotesk', var(--font-body);
+  --sidebar-w: 220px;
+  --topbar-h: 56px;
+  --bottomnav-h: 64px;
+  --gutter: 32px;
+  @include light-tokens;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    @include dark-tokens;
+  }
+}
+:root[data-theme='dark'] {
+  @include dark-tokens;
+}
+:root[data-theme='light'] {
+  @include light-tokens;
+}

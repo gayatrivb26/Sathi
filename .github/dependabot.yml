@@ -1,0 +1,60 @@
+# Dependabot: weekly grouped updates per ecosystem; security updates arrive immediately.
+version: 2
+
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      microsoft:
+        patterns: ["Microsoft.*", "System.*"]
+      opentelemetry:
+        patterns: ["OpenTelemetry*"]
+      test:
+        patterns: ["xunit*", "Testcontainers*", "coverlet*", "FluentAssertions*", "Microsoft.NET.Test.Sdk"]
+    labels: [dependencies, dotnet]
+
+  # uv lockfile support (services/ai-service/uv.lock)
+  - package-ecosystem: uv
+    directory: /services/ai-service
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      python-minor:
+        update-types: [minor, patch]
+    labels: [dependencies, python]
+
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 5
+    groups:
+      angular:
+        patterns: ["@angular/*", "@angular-devkit/*", "@schematics/angular"]
+      testing:
+        patterns: ["@playwright/*", "jasmine*", "karma*", "vitest*", "@types/*"]
+    labels: [dependencies, web]
+
+  - package-ecosystem: docker
+    directories:
+      - /apps/web
+      - /services/api
+      - /services/jobs
+      - /services/ai-service
+    schedule: { interval: weekly, day: tuesday }
+    labels: [dependencies, docker]
+
+  # Image tags referenced from compose files (postgres, minio, grafana, ...)
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule: { interval: weekly, day: tuesday }
+    labels: [dependencies, docker]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly, day: wednesday }
+    groups:
+      actions:
+        patterns: ["*"]
+    labels: [dependencies, ci]

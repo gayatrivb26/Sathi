@@ -1,0 +1,4 @@
+<Project>
+  <!-- Share build settings with services/api (Sathi.Core lives there). -->
+  <Import Project="..\api\Directory.Build.props" />
+</Project>

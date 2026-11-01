@@ -1,0 +1,232 @@
+<div class="tutor">
+  <section class="chat card" aria-labelledby="tutor-title">
+    <!-- Header: lesson, level, modes -->
+    <header class="chat-head">
+      <div class="title-row">
+        <div class="title-block">
+          <p class="eyebrow">{{ lessonTitle() ? 'Tutor · this lesson' : 'Tutor' }}</p>
+          <h1 id="tutor-title" class="title">{{ title() }}</h1>
+        </div>
+        <label class="level-select">
+          <span class="sr-only">Explanation level</span>
+          <select [value]="level()" (change)="setLevel($any($event.target).value)">
+            @for (l of levels; track l.id) { <option [value]="l.id" [selected]="level() === l.id">{{ l.label }}</option> }
+          </select>
+          <app-icon name="chevron-down" [size]="16" />
+        </label>
+        <div class="head-actions">
+          <button matButton="outlined" type="button" class="head-btn" (click)="newConversation()" [disabled]="!canStartNew()">
+            <app-icon name="edit" [size]="18" /> <span class="head-label">New conversation</span>
+          </button>
+          <button matButton="outlined" type="button" class="head-btn" (click)="historyOpen.set(true)" aria-haspopup="dialog">
+            <app-icon name="history" [size]="18" /> <span class="head-label">History</span>
+          </button>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Explanation level">
+          @for (l of levels; track l.id) {
+            <button type="button" [attr.aria-pressed]="level() === l.id" (click)="level.set(l.id)">{{ l.label }}</button>
+          }
+        </div>
+        <div class="modes" role="group" aria-label="Tutor mode">
+          @for (m of modes; track m.id) {
+            <button type="button" class="chip-btn" [attr.aria-pressed]="mode() === m.id" (click)="mode.set(m.id)">{{ m.label }}</button>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Messages -->
+    <div class="scroller" #scroller [attr.aria-busy]="streaming()">
+      @if (loadingConversation()) {
+        <div class="pad"><app-skeleton [lines]="4" [card]="false" label="Loading conversation" /></div>
+      } @else if (loadError()) {
+        <div class="pad">
+          <app-error-state [error]="loadError()" title="We couldn’t open this conversation" (retry)="open(conversation() || conversationId() || '')" />
+        </div>
+      } @else if (messages().length === 0) {
+        <div class="welcome">
+          <span class="welcome-icon" aria-hidden="true"><app-icon name="sparkles" [size]="28" /></span>
+          <h2>What would you like to understand?</h2>
+          <p class="muted">Ask in your own words. Answers cite your course and your uploaded notes — turn on <strong>Search the web</strong> to include web sources too.</p>
+          <ul class="suggest" aria-label="Suggested questions">
+            @for (s of suggestions(); track s) {
+              <li><button type="button" class="suggestion" (click)="useSuggestion(s)" [disabled]="!online()">{{ s }}</button></li>
+            }
+          </ul>
+        </div>
+      } @else {
+        <ol class="messages">
+          @for (m of messages(); track m.localId) {
+            @if (m.role === 'user') {
+              <li class="msg user">
+                <p class="sr-only">You asked:</p>
+                <div class="bubble">{{ m.content }}</div>
+                @if (m.webSearch) {
+                  <span class="web-tag"><app-icon name="globe" [size]="13" /> Web search on</span>
+                }
+              </li>
+            } @else {
+              <li class="msg assistant" [class.failed]="m.status === 'failed'">
+                <p class="sr-only">Sathi answered:</p>
+                <div class="answer">
+                  @if (m.status === 'streaming' && !m.content) {
+                    <div class="status" role="status">
+                      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                      <span>{{ m.slow ? 'Still working on it…' : m.statusText || 'Thinking…' }}</span>
+                    </div>
+                    @if (m.slow) {
+                      <p class="muted small slow-note">Some answers take a little longer. You can wait, or stop and rephrase.</p>
+                    }
+                  }
+                  @if (m.content) {
+                    <app-markdown [markdown]="m.content" [citations]="citeMode(m)" [streaming]="m.status === 'streaming'" (citeClick)="onCite(m, $event)" />
+                  }
+                  @if (m.notice) {
+                    <p class="notice"><app-icon name="info" [size]="15" /> {{ m.notice }}</p>
+                  }
+                  @if (m.error; as e) {
+                    <div class="inline-error" role="alert">
+                      <app-icon name="alert" [size]="18" />
+                      <div>
+                        <p>{{ e.userMessage }}</p>
+                        <app-reference-id [referenceId]="e.referenceId" />
+                      </div>
+                      @if (m.request) {
+                        <button matButton="outlined" type="button" (click)="retry(m)" [disabled]="streaming()"><app-icon name="refresh" [size]="16" /> Retry</button>
+                      }
+                    </div>
+                  }
+                  @if (m.serverStreaming) {
+                    <div class="actions" role="group" aria-label="This answer is unfinished">
+                      <button matButton="outlined" type="button" (click)="refresh()"><app-icon name="refresh" [size]="16" /> Refresh</button>
+                      <button matButton="outlined" type="button" (click)="stopServerAnswer(m)"><app-icon name="stop" [size]="16" /> Stop this answer</button>
+                    </div>
+                  }
+                  @if (m.status === 'cancelled' && m.request) {
+                    <div class="actions">
+                      <button matButton="outlined" type="button" (click)="retry(m)" [disabled]="streaming() || !online()"><app-icon name="refresh" [size]="16" /> Ask again</button>
+                    </div>
+                  }
+
+                  @if ((m.status === 'complete' || m.status === 'partial') && !m.serverStreaming) {
+                    @if (m.content) {
+                      <div class="actions" role="group" aria-label="Respond to this answer">
+                        <button matButton="outlined" type="button" (click)="adjust(m, 'simpler')" [disabled]="streaming() || !m.id"><app-icon name="simpler" [size]="16" /> Simpler</button>
+                        <button matButton="outlined" type="button" (click)="adjust(m, 'harder')" [disabled]="streaming() || !m.id"><app-icon name="harder" [size]="16" /> Harder</button>
+                        <button matButton="outlined" type="button" class="fb" [class.on]="m.feedback === 1" [attr.aria-pressed]="m.feedback === 1" (click)="feedback(m, 1)" [disabled]="!m.id">
+                          <app-icon name="thumbs-up" [size]="16" /> Helpful
+                        </button>
+                        <button matButton="outlined" type="button" class="fb" [class.on]="m.feedback === -1" [attr.aria-pressed]="m.feedback === -1" (click)="feedback(m, -1)" [disabled]="!m.id">
+                          <app-icon name="thumbs-down" [size]="16" /> Not helpful
+                        </button>
+                      </div>
+                    }
+                    @if (m.answerBasis.length || m.citations.length) {
+                      <div class="meta-row">
+                        @if (m.answerBasis.length) { <span class="basis">{{ basisText(m) }}</span> }
+                        @if (m.citations.length) {
+                          <button type="button" class="src-toggle" (click)="toggleInline(m)" [attr.aria-expanded]="inlineOpen().has(m.localId)" [attr.aria-controls]="'inline-' + m.localId">
+                            <app-icon name="book" [size]="15" /> {{ m.citations.length }} source{{ m.citations.length === 1 ? '' : 's' }}
+                            <app-icon name="chevron-down" [size]="15" [class.flip]="inlineOpen().has(m.localId)" />
+                          </button>
+                        }
+                      </div>
+                      @if (inlineOpen().has(m.localId)) {
+                        <div class="inline-sources" [id]="'inline-' + m.localId">
+                          <app-source-list [citations]="m.citations" [highlight]="highlightFor(m)" [idPrefix]="'msg-' + m.localId + '-src-'" />
+                        </div>
+                      }
+                    }
+                  }
+                </div>
+              </li>
+            }
+          }
+        </ol>
+      }
+    </div>
+
+    <!-- Composer: a full-width box that grows from 3 to ~8 lines, controls along its bottom edge -->
+    <form class="composer" (ngSubmit)="submit()">
+      <div class="box" [class.over]="draft().length > maxLen">
+        <label for="composer" class="sr-only">Ask the tutor</label>
+        <textarea
+          #composer
+          id="composer"
+          [appAutosize]="draft()"
+          [minRows]="3"
+          [maxHeight]="220"
+          [ngModel]="draft()"
+          (ngModelChange)="draft.set($event)"
+          name="draft"
+          (keydown)="onKeydown($event)"
+          [placeholder]="lessonTitle() ? 'Ask about this lesson…' : 'Ask about your course…'"
+          aria-describedby="composer-hint"
+        ></textarea>
+        <div class="composer-bar">
+          <button
+            type="button"
+            class="web-toggle"
+            role="switch"
+            [attr.aria-checked]="webSearch()"
+            (click)="webSearch.set(!webSearch())"
+            matTooltip="Also search the web and cite web pages"
+          >
+            <span class="track" aria-hidden="true"><span class="thumb"></span></span>
+            <app-icon name="globe" [size]="16" />
+            <span>Search the web</span>
+          </button>
+          <p id="composer-hint" class="hint">
+            @if (!online()) {
+              <app-icon name="wifi-off" [size]="14" /> You’re offline — reconnect to ask a question.
+            } @else {
+              Enter to send · Shift+Enter for a new line
+            }
+          </p>
+          @if (draft().length > maxLen - 200) {
+            <span class="count num" [class.bad]="draft().length > maxLen">{{ draft().length }}/{{ maxLen }}</span>
+          }
+          @if (streaming()) {
+            <button matButton="outlined" type="button" class="send" (click)="stop()"><app-icon name="stop" [size]="16" /> Stop</button>
+          } @else {
+            <button matButton="filled" type="submit" class="send" [disabled]="!canSend()"><app-icon name="send" [size]="18" /> Send</button>
+          }
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- Sources panel (wide screens) -->
+  <aside class="sources card" aria-labelledby="sources-h">
+    <h2 id="sources-h">Sources used</h2>
+    @if (sourcesMessage(); as sm) {
+      <app-source-list [citations]="sm.citations" [basis]="sm.answerBasis" [highlight]="highlightFor(sm)" idPrefix="side-src-" />
+    } @else {
+      <p class="muted small">When the tutor answers, the passages it used appear here — numbered to match the chips in the answer.</p>
+    }
+    <div class="legend" aria-label="Source types">
+      <span class="pill"><app-icon name="book" [size]="13" /> Course</span>
+      <span class="pill upload"><app-icon name="file" [size]="13" /> Your notes</span>
+      <span class="pill web"><app-icon name="globe" [size]="13" /> Web</span>
+    </div>
+    <p class="muted small foot">
+      Answers cite your course material and your own uploaded notes{{ webSearch() ? ', plus web pages while Search the web is on' : ' only' }}.
+      <a routerLink="/notes">Manage notes</a>
+    </p>
+  </aside>
+</div>
+
+<div class="sr-only" aria-live="polite" aria-atomic="true">{{ announce() }}</div>
+
+@if (historyOpen()) {
+  <app-history-drawer
+    [courseId]="null"
+    [currentId]="conversationId()"
+    (closed)="historyOpen.set(false)"
+    (pick)="open($event)"
+    (newChat)="newConversation()"
+    (deleted)="onDeleted($event)"
+  />
+}

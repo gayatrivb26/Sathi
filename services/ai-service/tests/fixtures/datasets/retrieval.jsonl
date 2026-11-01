@@ -1,0 +1,2 @@
+{"id": "fx-ret-1", "question": "Why do we divide attention scores by the square root of d_k?", "expected_lesson_titles": ["Scaled dot-product attention"], "expected_keywords": ["softmax", "variance"]}
+{"id": "fx-ret-2", "question": "How does reciprocal rank fusion combine ranked lists?", "expected_lesson_titles": ["Hybrid search and reciprocal rank fusion"], "expected_keywords": ["rank"]}

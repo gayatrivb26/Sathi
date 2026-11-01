@@ -1,0 +1,104 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- Desktop sidebar -->
+<aside class="sidebar" aria-label="Sathi">
+  <a routerLink="/home" class="brand" aria-label="Sathi home"><app-logo [onDark]="true" /></a>
+  <nav aria-label="Main">
+    <ul>
+      @for (item of studentNav; track item.path) {
+        <li>
+          <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">
+            <app-icon [name]="item.icon" [size]="20" />
+            <span>{{ item.label }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+    @if (staffNav().length) {
+      <p class="nav-group">Staff</p>
+      <ul>
+        @for (item of staffNav(); track item.path) {
+          <li>
+            @if (item.external) {
+              <a [href]="item.path" target="_blank" rel="noopener" class="nav-link">
+                <app-icon [name]="item.icon" [size]="20" />
+                <span>{{ item.label }}</span>
+                <app-icon name="external" [size]="14" class="ext" />
+                <span class="sr-only"> (opens in a new tab)</span>
+              </a>
+            } @else {
+              <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">
+                <app-icon [name]="item.icon" [size]="20" />
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </nav>
+  <div class="me">
+    <a routerLink="/settings" routerLinkActive="active" ariaCurrentWhenActive="page" class="nav-link">
+      <app-icon name="settings" [size]="20" />
+      <span>Settings</span>
+    </a>
+    <div class="user">
+      <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+      <span class="who">
+        <span class="nm">{{ auth.me()?.displayName }}</span>
+        <span class="em">{{ auth.me()?.email }}</span>
+      </span>
+      <button type="button" class="icon-btn" (click)="signOut()" aria-label="Sign out" title="Sign out">
+        <app-icon name="logout" [size]="18" />
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Phone top bar -->
+<header class="topbar">
+  <a routerLink="/home" aria-label="Sathi home"><app-logo [onDark]="true" /></a>
+  <button type="button" class="avatar-btn" [matMenuTriggerFor]="accountMenu" aria-label="Account menu">
+    <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+  </button>
+  <mat-menu #accountMenu="matMenu" xPosition="before">
+    <div class="menu-head" aria-hidden="true">{{ auth.me()?.displayName }}</div>
+    <a mat-menu-item routerLink="/settings"><app-icon name="settings" [size]="18" /> Settings</a>
+    <button mat-menu-item type="button" (click)="signOut()"><app-icon name="logout" [size]="18" /> Sign out</button>
+  </mat-menu>
+</header>
+
+<main id="main-content" tabindex="-1" class="main">
+  <app-offline-banner />
+  <router-outlet />
+</main>
+
+<!-- Phone bottom navigation -->
+<nav class="bottom-nav" aria-label="Main">
+  <ul>
+    @for (item of mobileNav; track item.path) {
+      <li>
+        <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
+          <app-icon [name]="item.icon" [size]="22" />
+          <span>{{ item.label }}</span>
+        </a>
+      </li>
+    }
+    <li>
+      <button type="button" [class.active]="moreActive()" [matMenuTriggerFor]="moreMenu" aria-label="More pages">
+        <app-icon name="more" [size]="22" />
+        <span>More</span>
+      </button>
+    </li>
+  </ul>
+</nav>
+<mat-menu #moreMenu="matMenu" yPosition="above" xPosition="before">
+  @for (item of moreNav(); track item.path) {
+    @if (item.external) {
+      <a mat-menu-item [href]="item.path" target="_blank" rel="noopener"><app-icon [name]="item.icon" [size]="18" /> {{ item.label }} <app-icon name="external" [size]="14" /><span class="sr-only"> (opens in a new tab)</span></a>
+    } @else {
+      <a mat-menu-item [routerLink]="item.path"><app-icon [name]="item.icon" [size]="18" /> {{ item.label }}</a>
+    }
+  }
+  <button mat-menu-item type="button" (click)="signOut()"><app-icon name="logout" [size]="18" /> Sign out</button>
+</mat-menu>

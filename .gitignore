@@ -1,0 +1,68 @@
+# ---- Secrets ----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+secrets/
+
+# ---- .NET -------------------------------------------------------------------
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+*.userprefs
+*.rsuser
+.vs/
+artifacts/
+*.nupkg
+
+# ---- Node / Angular ---------------------------------------------------------
+node_modules/
+dist/
+.angular/
+coverage/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+npm-debug.log*
+yarn-error.log*
+
+# ---- Python -----------------------------------------------------------------
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+.ipynb_checkpoints/
+mlruns/
+
+# ---- Models / data caches ----------------------------------------------------
+.cache/
+**/fastembed_cache/
+*.onnx
+
+# ---- IDE / OS -----------------------------------------------------------------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+.DS_Store
+Thumbs.db
+
+# ---- Logs / local runtime ----------------------------------------------------
+*.log
+logs/
+
+# ---- Local backups (docs/runbooks/backup-restore.md) ----------------------
+backups/

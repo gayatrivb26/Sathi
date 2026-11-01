@@ -1,0 +1,126 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <h1>Revision</h1>
+      <p class="sub">Spaced repetition: review each idea just before you’d forget it.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="main-col">
+      @switch (due.status()) {
+        @case ('loading') { <app-skeleton [lines]="5" /> }
+        @case ('error') { <app-error-state [error]="due.error()" title="We couldn’t load your cards" (retry)="due.load()" /> }
+        @case ('ready') {
+          @if (!started()) {
+            @if (cards().length) {
+              <section class="card start" aria-labelledby="start-h">
+                <span class="big-icon" aria-hidden="true"><app-icon name="repeat" [size]="28" /></span>
+                <div>
+                  <h2 id="start-h">{{ cards().length }} card{{ cards().length === 1 ? '' : 's' }} due today</h2>
+                  <p class="muted">About {{ minutes() }} minute{{ minutes() === 1 ? '' : 's' }}. Answer, rate how well you knew it, and we’ll schedule the next review.</p>
+                </div>
+                <button matButton="filled" type="button" (click)="started.set(true)">Start revision</button>
+              </section>
+            } @else {
+              <app-empty-state icon="check-circle" title="You’re all caught up" text="No cards are due right now. New cards appear as you practise — check the schedule to see what’s coming.">
+                <a matButton="outlined" routerLink="/practice">Practise something new</a>
+              </app-empty-state>
+            }
+          } @else if (finished()) {
+            <section class="card done" aria-labelledby="done-h">
+              <span class="big-icon ok" aria-hidden="true"><app-icon name="trophy" [size]="28" /></span>
+              <h2 id="done-h">All done for today</h2>
+              <p class="muted">You reviewed {{ reviewed() }} card{{ reviewed() === 1 ? '' : 's' }}. See you at the next review.</p>
+              <div class="row"><a matButton="filled" routerLink="/home">Back to home</a><a matButton="outlined" routerLink="/practice">Keep practising</a></div>
+            </section>
+          } @else if (card(); as c) {
+            <section class="card flow" aria-labelledby="card-h">
+              <div class="flow-head">
+                <h2 id="card-h" class="sr-only">Revision card {{ index() + 1 }} of {{ cards().length }}</h2>
+                <span class="pill neutral">{{ c.question.conceptName }}</span>
+                <span class="muted num">Card {{ index() + 1 }} of {{ cards().length }}</span>
+              </div>
+              <div class="bar thin" aria-hidden="true"><div class="fill" [style.width.%]="((index() + (result() ? 1 : 0)) / cards().length) * 100"></div></div>
+              <div class="q">
+                <app-question-card
+                  [question]="c.question"
+                  [hideSubmit]="true"
+                  [reveal]="result() ? { selectedOptionId: result()!.selectedOptionId, correctOptionId: result()!.correctOptionId, isCorrect: result()!.isCorrect } : null"
+                  (selectionChange)="selected.set($event)"
+                />
+                @if (c.question.type === 'short' && !result()) {
+                  <label class="sr-only" for="rev-free">Your answer</label>
+                  <textarea id="rev-free" class="free" rows="4" [ngModel]="freeText()" (ngModelChange)="freeText.set($event)" placeholder="Type your answer…"></textarea>
+                }
+              </div>
+
+              @if (!result()) {
+                <fieldset class="rate" [disabled]="!canRate() || busy()">
+                  <legend>How well did you know it?</legend>
+                  <div class="rate-grid">
+                    @for (r of ratings; track r.quality) {
+                      <button type="button" class="rate-btn" [attr.data-q]="r.quality" (click)="rate(r.quality)">
+                        <strong>{{ r.label }}</strong><span>{{ r.hint }}</span>
+                      </button>
+                    }
+                  </div>
+                  @if (!canRate()) { <p class="muted small">Choose an answer first.</p> }
+                </fieldset>
+              } @else if (result(); as r) {
+                <div class="reveal" role="status" [class.ok]="r.isCorrect">
+                  <p class="verdict"><app-icon [name]="r.isCorrect ? 'check-circle' : 'x-circle'" [size]="20" /> {{ r.isCorrect ? 'Correct' : 'Not quite' }}</p>
+                  <p>{{ r.explanation }}</p>
+                  <p class="due"><app-icon name="calendar-clock" [size]="16" /> Next review in {{ r.intervalDays }} day{{ r.intervalDays === 1 ? '' : 's' }} · {{ r.nextDueAt | date: 'EEE d MMM' }}</p>
+                </div>
+                <div class="row"><button matButton="filled" type="button" (click)="next()">{{ index() + 1 >= cards().length ? 'Finish' : 'Next card' }}</button></div>
+              }
+              @if (error(); as e) { <app-error-state [error]="e" title="That review wasn’t saved" [compact]="true" [retryable]="false" /> }
+            </section>
+          }
+        }
+      }
+
+      <section class="card" aria-labelledby="sched-h">
+        <div class="card-title">
+          <h2 id="sched-h">Next 14 days</h2>
+          @if (schedule.data()) { <span class="muted small">{{ upcoming() }} card{{ upcoming() === 1 ? '' : 's' }} scheduled</span> }
+        </div>
+        @switch (schedule.status()) {
+          @case ('loading') { <app-skeleton [lines]="2" [heading]="false" [card]="false" /> }
+          @case ('error') { <app-error-state [error]="schedule.error()" [compact]="true" title="We couldn’t load the schedule" (retry)="schedule.load()" /> }
+          @default {
+            <ol class="days">
+              @for (d of schedule.data()?.days ?? []; track d.date; let i = $index) {
+                <li [class.today]="i === 0" [attr.aria-label]="dayLabel(d.date, i) + ': ' + d.count + ' card' + (d.count === 1 ? '' : 's')">
+                  <span class="cnt num" aria-hidden="true">{{ d.count || '' }}</span>
+                  <span class="col" aria-hidden="true"><span class="colfill" [style.height.%]="(d.count / maxDay()) * 100"></span></span>
+                  <span class="lbl" aria-hidden="true">{{ dayLabel(d.date, i) }}</span>
+                </li>
+              }
+            </ol>
+          }
+        }
+      </section>
+    </div>
+
+    <aside class="card prefs" aria-labelledby="rem-h">
+      <h2 id="rem-h"><app-icon name="bell" [size]="18" /> Reminders</h2>
+      <p class="muted small">We’ll email you when cards are due — once a day at most.</p>
+      <mat-slide-toggle [checked]="remindersEnabled()" (change)="remindersEnabled.set($event.checked)">Email reminders</mat-slide-toggle>
+      <mat-form-field>
+        <mat-label>Time</mat-label>
+        <mat-select [value]="reminderHour()" (valueChange)="reminderHour.set($event)" [disabled]="!remindersEnabled()">
+          @for (h of hours; track h) { <mat-option [value]="h">{{ hourLabel(h) }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field>
+        <mat-label>Time zone</mat-label>
+        <mat-select [value]="timezone()" (valueChange)="timezone.set($event)" [disabled]="!remindersEnabled()">
+          @for (z of timezones; track z) { <mat-option [value]="z">{{ z }}</mat-option> }
+        </mat-select>
+      </mat-form-field>
+      <button matButton="filled" type="button" (click)="savePrefs()" [disabled]="savingPrefs()">{{ savingPrefs() ? 'Saving…' : 'Save reminders' }}</button>
+    </aside>
+  </div>
+</div>

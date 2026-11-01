@@ -1,0 +1,550 @@
+:host {
+  display: block;
+}
+.tutor {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 22px;
+  padding: 28px var(--gutter);
+  max-width: 1320px;
+  margin: 0 auto;
+  height: 100vh;
+  @media (max-width: 1099.98px) {
+    grid-template-columns: minmax(0, 1fr);
+    .sources {
+      display: none;
+    }
+  }
+  @media (max-width: 719.98px) {
+    padding: 0;
+    height: calc(100dvh - var(--topbar-h) - var(--bottomnav-h));
+  }
+}
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  @media (max-width: 719.98px) {
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+}
+.chat-head {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  @media (max-width: 719.98px) {
+    padding: 12px 14px 10px;
+    gap: 10px;
+  }
+}
+.title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.title-block {
+  min-width: 0;
+}
+.title {
+  font-size: 1.2rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap-reverse;
+}
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 14px;
+  background: var(--surface-3);
+  button {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 11px;
+    background: none;
+    color: var(--muted);
+    font-weight: 600;
+    cursor: pointer;
+    &[aria-pressed='true'] {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--primary) 35%, transparent);
+    }
+    &:not([aria-pressed='true']):hover {
+      color: var(--ink);
+    }
+  }
+  @media (max-width: 719.98px) {
+    display: flex;
+    width: 100%;
+    button {
+      flex: 1;
+      min-height: 44px;
+      padding: 0 6px;
+      font-size: 0.875rem;
+    }
+  }
+}
+.modes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  .chip-btn {
+    min-height: 40px;
+  }
+  @media (max-width: 719.98px) {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    .chip-btn {
+      min-height: 44px;
+      flex: none;
+    }
+  }
+}
+.level-select {
+  display: none;
+  position: relative;
+  align-items: center;
+  select {
+    appearance: none;
+    min-height: 44px;
+    padding: 0 34px 0 14px;
+    border: 1px solid var(--border-input);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  app-icon {
+    position: absolute;
+    right: 10px;
+    pointer-events: none;
+    color: var(--muted);
+  }
+}
+@media (max-width: 719.98px) {
+  .title-row {
+    align-items: center;
+  }
+  .title-block .eyebrow {
+    display: none;
+  }
+  .title {
+    font-size: 1.05rem;
+  }
+  .level-select {
+    display: inline-flex;
+    margin-left: auto;
+  }
+  .controls .seg {
+    display: none;
+  }
+}
+.head-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+.head-btn {
+  min-height: 44px;
+}
+// On small phones the buttons become icon-only but keep their text for screen readers.
+.head-label {
+  @media (max-width: 559.98px) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+@media (max-width: 559.98px) {
+  .head-btn {
+    --mat-button-outlined-horizontal-padding: 10px;
+    min-width: 44px;
+    app-icon {
+      margin: 0;
+    }
+  }
+}
+
+.scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 22px;
+  scroll-behavior: smooth;
+  @media (max-width: 719.98px) {
+    padding: 14px;
+  }
+}
+.pad {
+  padding: 8px 0;
+}
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  max-width: 520px;
+  margin: 6vh auto 0;
+  h2 {
+    font-size: 1.35rem;
+  }
+}
+.welcome-icon {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--primary-soft), var(--amber-soft));
+  color: var(--primary-ink);
+}
+.suggest {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.suggestion {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 16px;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+  cursor: pointer;
+  font-weight: 500;
+  &:hover {
+    border-color: var(--primary-ink);
+    background: var(--primary-soft);
+  }
+}
+
+.messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.msg.user {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.bubble {
+  max-width: min(78%, 620px);
+  padding: 12px 16px;
+  border-radius: 18px 18px 6px 18px;
+  background: var(--primary-soft);
+  color: var(--ink);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.web-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--web);
+  font-weight: 600;
+}
+.answer {
+  padding: 16px 18px;
+  border-radius: 6px 18px 18px 18px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  max-width: 100%;
+  @media (max-width: 719.98px) {
+    padding: 14px;
+  }
+}
+.failed .answer {
+  background: var(--surface);
+}
+.status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-weight: 500;
+}
+.dots {
+  display: inline-flex;
+  gap: 4px;
+  i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--primary);
+    animation: bounce 1.2s infinite ease-in-out;
+    &:nth-child(2) {
+      animation-delay: 0.15s;
+    }
+    &:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+  }
+}
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.slow-note {
+  margin-top: 6px;
+}
+.notice {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin-top: 12px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.inline-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--danger-soft);
+  > app-icon {
+    color: var(--danger);
+    margin-top: 2px;
+  }
+  > div {
+    flex: 1;
+    min-width: 180px;
+  }
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  button {
+    --mat-button-outlined-container-height: 40px;
+    min-height: 44px;
+    background: var(--surface);
+  }
+  .fb.on {
+    --mat-button-outlined-outline-color: var(--primary);
+    --mat-button-outlined-label-text-color: var(--primary-ink);
+    background: var(--primary-soft);
+  }
+}
+.meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.basis {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+.src-toggle {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--primary-ink);
+  font-weight: 600;
+  cursor: pointer;
+  .flip {
+    transform: rotate(180deg);
+  }
+  @media (max-width: 1099.98px) {
+    display: inline-flex;
+  }
+}
+.inline-sources {
+  margin-top: 8px;
+  @media (min-width: 1100px) {
+    display: none;
+  }
+}
+
+.composer {
+  flex: none; // never let the chat column squeeze the composer
+  padding: 12px 22px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  @media (max-width: 719.98px) {
+    padding: 8px 10px 10px;
+  }
+}
+.box {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-input);
+  border-radius: 16px;
+  background: var(--surface);
+  &:focus-within {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 1px;
+    border-color: var(--primary);
+  }
+  &.over {
+    border-color: var(--danger);
+  }
+  textarea {
+    display: block;
+    flex: none;
+    width: 100%;
+    min-height: calc(3 * 1.45em + 24px);
+    max-height: 220px;
+    padding: 12px 16px;
+    border: 0;
+    border-radius: 16px 16px 0 0;
+    background: transparent;
+    color: var(--ink);
+    resize: none;
+    line-height: 1.45;
+    font-size: 1rem;
+    overflow-y: hidden;
+    &:focus,
+    &:focus-visible {
+      outline: none;
+    }
+  }
+}
+.composer-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: 6px 8px 8px 10px;
+}
+.count {
+  align-self: center;
+  font-size: 0.75rem;
+  color: var(--muted);
+  &.bad {
+    color: var(--danger);
+    font-weight: 700;
+  }
+}
+.web-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  white-space: nowrap;
+  .track {
+    position: relative;
+    width: 34px;
+    height: 20px;
+    border-radius: 999px;
+    background: var(--track);
+    border: 1px solid var(--border-input);
+  }
+  .thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: transform 0.15s;
+  }
+  &[aria-checked='true'] {
+    color: var(--web);
+    border-color: var(--web);
+    background: var(--web-soft);
+    .track {
+      background: var(--web);
+      border-color: var(--web);
+    }
+    .thumb {
+      transform: translateX(14px);
+    }
+  }
+}
+.hint {
+  flex: 1;
+  min-width: 0;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: var(--muted);
+  @media (max-width: 719.98px) {
+    visibility: hidden;
+  }
+}
+.send {
+  min-height: 44px;
+  flex: none;
+}
+
+.sources {
+  align-self: start;
+  max-height: 100%;
+  overflow-y: auto;
+  h2 {
+    margin-bottom: 14px;
+  }
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 18px;
+}
+.foot {
+  margin-top: 12px;
+}

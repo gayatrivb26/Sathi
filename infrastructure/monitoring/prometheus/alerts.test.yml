@@ -1,0 +1,73 @@
+# promtool unit tests for alerts.yml:  promtool test rules alerts.test.yml
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: api 5xx error rate fires after 5 minutes above 5%
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="api", http_route="/api/v1/home", http_response_status_code="200"}'
+        values: '0+60x20'
+      - series: 'http_server_request_duration_seconds_count{job="api", http_route="/api/v1/home", http_response_status_code="500"}'
+        values: '0+12x20'
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: ApiHighErrorRate
+        exp_alerts: []
+      - eval_time: 15m
+        alertname: ApiHighErrorRate
+        exp_alerts:
+          - exp_labels: { severity: critical, area: api }
+            exp_annotations:
+              summary: "API 5xx error rate above 5% for 5 minutes"
+              description: "16.67% of API requests are failing with 5xx."
+              runbook: docs/runbooks/debugging.md#api-errors
+
+  - name: no 5xx alert on healthy traffic
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="sathi/api", http_response_status_code="200"}'
+        values: '0+100x20'
+      - series: 'http_server_request_duration_seconds_count{job="sathi/api", http_response_status_code="503"}'
+        values: '0+1x20'
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: ApiHighErrorRate
+        exp_alerts: []
+
+  - name: ingestion failure alerts immediately
+    interval: 1m
+    input_series:
+      - series: 'sathi_ingestion_failures_total{job="jobs"}'
+        values: '0 0 0 1 1 1 1 1'
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: IngestionFailures
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: IngestionFailures
+        exp_alerts:
+          - exp_labels: { severity: warning, area: ingestion }
+            exp_annotations:
+              summary: "Document ingestion failed after all retries"
+              description: "1 ingestion jobs failed in 15 minutes. Look up the reference ID shown on the My notes screen."
+              runbook: docs/runbooks/debugging.md#ingestion-failure
+
+  - name: LLM error rate
+    interval: 1m
+    input_series:
+      - series: 'sathi_llm_calls_total{job="ai-service", outcome="ok"}'
+        values: '0+10x30'
+      - series: 'sathi_llm_calls_total{job="ai-service", outcome="timeout"}'
+        values: '0+5x30'
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: LlmHighErrorRate
+        exp_alerts:
+          - exp_labels: { severity: critical, area: ai }
+            exp_annotations:
+              summary: "More than 10% of LLM calls failing"
+              description: "33.33% of LLM calls are failing (timeouts, rate limits, refusals or provider errors)."
+              runbook: docs/runbooks/troubleshooting.md#llm-errors

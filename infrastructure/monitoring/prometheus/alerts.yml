@@ -1,0 +1,215 @@
+# Sathi alert rules (master spec §7.7). Validate and unit-test with:
+#   scripts/check-monitoring.(sh|ps1)
+# i.e. promtool check rules alerts.yml && promtool test rules alerts.test.yml
+#
+# Metric sources (all via OTLP -> OTel Collector -> Prometheus exporter):
+#   .NET  http_server_request_duration_seconds (OTel semantic conventions),
+#         sathi_tutor_ttft_ms (histogram), sathi_ai_cost_usd_total, sathi_ingestion_failures_total,
+#         sathi_grading_routed_total{route}, sathi_jobs_failed_total{queue,job_type},
+#         sathi_jobs_queue_oldest_age_seconds{queue}
+#   Python sathi_llm_calls_total{outcome}, sathi_llm_latency_ms (histogram),
+#         sathi_retrieval_latency_ms (histogram), sathi_web_search_total{outcome}
+# The collector exporter sets job=<service.name> or <service.namespace>/<service.name>,
+# hence the job=~"(.+/)?api" matchers.
+#
+# Every alert carries `runbook` pointing at docs/runbooks. Thresholds are starting points;
+# tune them from real traffic.
+
+groups:
+  - name: sathi-api
+    rules:
+      - alert: ApiHighErrorRate
+        expr: |
+          (
+            sum(rate(http_server_request_duration_seconds_count{job=~"(.+/)?api", http_response_status_code=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(http_server_request_duration_seconds_count{job=~"(.+/)?api"}[5m])), 1e-9)
+          ) > 0.05
+          and sum(rate(http_server_request_duration_seconds_count{job=~"(.+/)?api"}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          area: api
+        annotations:
+          summary: "API 5xx error rate above 5% for 5 minutes"
+          description: "{{ $value | humanizePercentage }} of API requests are failing with 5xx."
+          runbook: docs/runbooks/debugging.md#api-errors
+
+      - alert: ApiHighLatencyP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (
+              rate(http_server_request_duration_seconds_bucket{job=~"(.+/)?api", http_route!~".*/stream$"}[5m])
+            )
+          ) > 1
+        for: 10m
+        labels:
+          severity: warning
+          area: api
+        annotations:
+          summary: "API p95 latency above 1 s (SSE streams excluded)"
+          description: "p95 = {{ $value | humanizeDuration }}."
+          runbook: docs/runbooks/troubleshooting.md#slow-api
+
+  - name: sathi-jobs
+    rules:
+      - alert: HangfireQueueBacklog
+        expr: max by (queue) (sathi_jobs_queue_oldest_age_seconds) > 600
+        for: 5m
+        labels:
+          severity: warning
+          area: jobs
+        annotations:
+          summary: "Hangfire queue {{ $labels.queue }}: oldest job waiting > 10 minutes"
+          description: "Oldest enqueued job is {{ $value | humanizeDuration }} old. Check the jobs host and worker counts."
+          runbook: docs/runbooks/troubleshooting.md#jobs-stuck
+
+      - alert: HangfireJobsFailing
+        expr: sum by (queue, job_type) (increase(sathi_jobs_failed_total[15m])) > 0
+        labels:
+          severity: warning
+          area: jobs
+        annotations:
+          summary: "Hangfire job {{ $labels.job_type }} failed after all retries"
+          description: "{{ $value | humanize }} jobs on queue {{ $labels.queue }} exhausted retries in 15 minutes."
+          runbook: docs/runbooks/debugging.md#hangfire-job
+
+  - name: sathi-ai
+    rules:
+      - alert: LlmDailySpendNearCap
+        expr: sum(increase(sathi_ai_cost_usd_total[24h])) > 4
+        labels:
+          severity: warning
+          area: ai-cost
+        annotations:
+          summary: "LLM spend in the last 24 h above $4 (80% of the default $5 cap)"
+          description: "Rolling 24 h spend is ${{ $value | printf \"%.2f\" }}. At LLM_DAILY_SPEND_CAP_USD calls fail with SPEND_CAP_REACHED."
+          runbook: docs/runbooks/troubleshooting.md#llm-spend
+
+      - alert: LlmDailySpendCapReached
+        expr: sum(increase(sathi_ai_cost_usd_total[24h])) >= 5
+        labels:
+          severity: critical
+          area: ai-cost
+        annotations:
+          summary: "LLM daily spend cap reached — tutor answers are failing with SPEND_CAP_REACHED"
+          runbook: docs/runbooks/troubleshooting.md#llm-spend
+
+      - alert: LlmHighErrorRate
+        expr: |
+          (
+            sum(rate(sathi_llm_calls_total{outcome!~"ok|success"}[10m]))
+            /
+            clamp_min(sum(rate(sathi_llm_calls_total[10m])), 1e-9)
+          ) > 0.10
+          and sum(rate(sathi_llm_calls_total[10m])) > 0.01
+        for: 10m
+        labels:
+          severity: critical
+          area: ai
+        annotations:
+          summary: "More than 10% of LLM calls failing"
+          description: "{{ $value | humanizePercentage }} of LLM calls are failing (timeouts, rate limits, refusals or provider errors)."
+          runbook: docs/runbooks/troubleshooting.md#llm-errors
+
+      - alert: TutorTimeToFirstTokenP95High
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(sathi_tutor_ttft_ms_bucket[10m]))) > 4000
+          and sum(rate(sathi_tutor_ttft_ms_count[10m])) > 0
+        for: 10m
+        labels:
+          severity: warning
+          area: ai
+        annotations:
+          summary: "Tutor time-to-first-token p95 above 4 s"
+          description: "p95 TTFT = {{ $value | printf \"%.0f\" }} ms."
+          runbook: docs/runbooks/troubleshooting.md#slow-tutor
+
+      - alert: RetrievalLatencyP95High
+        expr: |
+          histogram_quantile(0.95, sum by (le) (rate(sathi_retrieval_latency_ms_bucket[10m]))) > 1500
+          and sum(rate(sathi_retrieval_latency_ms_count[10m])) > 0
+        for: 15m
+        labels:
+          severity: warning
+          area: ai
+        annotations:
+          summary: "Retrieval p95 above 1.5 s"
+          runbook: docs/runbooks/troubleshooting.md#slow-tutor
+
+      - alert: WebSearchFailing
+        expr: |
+          (
+            sum(rate(sathi_web_search_total{outcome="failed"}[15m]))
+            /
+            clamp_min(sum(rate(sathi_web_search_total[15m])), 1e-9)
+          ) > 0.30
+          and sum(rate(sathi_web_search_total[15m])) > 0.005
+        for: 15m
+        labels:
+          severity: warning
+          area: ai
+        annotations:
+          summary: "More than 30% of web searches failing (answers continue without web sources)"
+          runbook: docs/runbooks/troubleshooting.md#web-search
+
+  - name: sathi-ingestion-grading
+    rules:
+      - alert: IngestionFailures
+        expr: sum(increase(sathi_ingestion_failures_total[15m])) > 0
+        labels:
+          severity: warning
+          area: ingestion
+        annotations:
+          summary: "Document ingestion failed after all retries"
+          description: "{{ $value | humanize }} ingestion jobs failed in 15 minutes. Look up the reference ID shown on the My notes screen."
+          runbook: docs/runbooks/debugging.md#ingestion-failure
+
+      - alert: IngestionFailureSpike
+        expr: sum(increase(sathi_ingestion_failures_total[1h])) > 5
+        labels:
+          severity: critical
+          area: ingestion
+        annotations:
+          summary: "More than 5 ingestion failures in the last hour"
+          runbook: docs/runbooks/debugging.md#ingestion-failure
+
+      - alert: GradingReviewRateHigh
+        expr: |
+          (
+            sum(increase(sathi_grading_routed_total{route="needs_review"}[6h]))
+            /
+            clamp_min(sum(increase(sathi_grading_routed_total[6h])), 1e-9)
+          ) > 0.5
+          and sum(increase(sathi_grading_routed_total[6h])) >= 10
+        labels:
+          severity: info
+          area: grading
+        annotations:
+          summary: "More than half of AI-graded answers routed to instructor review"
+          description: "Check rubric quality or the Grading__AutoAcceptConfidence threshold."
+          runbook: docs/runbooks/troubleshooting.md#grading
+
+  - name: sathi-telemetry
+    rules:
+      - alert: TelemetryPipelineDown
+        expr: up{job=~"otel-collector|loki|tempo"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          area: observability
+        annotations:
+          summary: "{{ $labels.job }} is down — logs/traces are not being stored"
+          runbook: docs/runbooks/troubleshooting.md#observability
+
+      - alert: CollectorDroppingData
+        expr: |
+          (sum(rate(otelcol_exporter_send_failed_spans_total[5m])) or vector(0))
+          + (sum(rate(otelcol_exporter_send_failed_log_records_total[5m])) or vector(0)) > 0
+        for: 10m
+        labels:
+          severity: warning
+          area: observability
+        annotations:
+          summary: "OTel Collector failing to export spans or logs"
+          runbook: docs/runbooks/troubleshooting.md#observability

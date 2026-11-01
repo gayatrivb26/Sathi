@@ -1,0 +1,139 @@
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.stem {
+  display: block;
+  font-family: var(--font-head);
+  font-weight: 650;
+  font-size: clamp(1.1rem, 1rem + 0.5vw, 1.3rem);
+  line-height: 1.35;
+  margin-bottom: 18px;
+  padding: 0;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.opt {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 52px;
+  padding: 13px 16px;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    transform 0.1s;
+  &:hover:not(.locked) {
+    border-color: var(--primary-ink);
+  }
+  &:has(input:focus-visible) {
+    outline: 3px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  &.selected {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    .letter {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+  }
+  &.correct {
+    border-color: var(--mint);
+    background: var(--mint-soft);
+    .letter {
+      background: var(--mint);
+      color: #fff;
+    }
+  }
+  &.wrong {
+    border-color: var(--amber-bar);
+    background: var(--amber-soft);
+    .letter {
+      background: var(--amber-bar);
+      color: #fff;
+    }
+  }
+  &.locked {
+    cursor: default;
+  }
+}
+// The native radio covers the whole card: real pointer + keyboard semantics, invisible.
+.opt-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  &:disabled {
+    cursor: default;
+  }
+}
+.letter {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: var(--surface-3);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.text {
+  padding-top: 2px;
+}
+.tag {
+  font-weight: 700;
+  &.ok {
+    color: var(--mint-ink);
+  }
+  &.bad {
+    color: var(--amber-ink);
+  }
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: -8px 0 10px;
+}
+.short {
+  width: 100%;
+  min-height: 130px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-input);
+  border-radius: 14px;
+  background: var(--surface);
+  resize: vertical;
+  line-height: 1.55;
+  &:focus-visible {
+    border-color: var(--primary);
+  }
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

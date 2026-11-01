@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>Sathi.Api</RootNamespace>
+    <UserSecretsId>sathi-api</UserSecretsId>
+    <!-- Contract 11.9: the OpenAPI document is generated at build time (GetDocument runs Program without starting a server,
+         see Infrastructure/OpenApiSupport.cs BuildTimeOpenApi) and copied to <repo>/contracts/openapi/api.v1.json.
+         The generator only accepts [A-Za-z0-9_-] file names, hence the copy. Disable with -p:OpenApiGenerateDocuments=false. -->
+    <OpenApiDocumentsDirectory>$(BaseIntermediateOutputPath)openapi</OpenApiDocumentsDirectory>
+    <OpenApiGenerateDocumentsOptions>--file-name api</OpenApiGenerateDocumentsOptions>
+    <SathiContractsOpenApiDirectory>$([System.IO.Path]::GetFullPath('$(MSBuildProjectDirectory)/../../../../contracts/openapi'))</SathiContractsOpenApiDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Sathi.Core\Sathi.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sathi.Api.Tests" />
+  </ItemGroup>
+
+  <Target Name="CopyOpenApiDocumentToContracts" AfterTargets="GenerateOpenApiDocuments"
+          Condition="'$(OpenApiGenerateDocuments)' != 'false' And Exists('$(OpenApiDocumentsDirectory)/api.json')">
+    <Copy SourceFiles="$(OpenApiDocumentsDirectory)/api.json" DestinationFiles="$(SathiContractsOpenApiDirectory)/api.v1.json" SkipUnchangedFiles="true" />
+  </Target>
+
+</Project>

@@ -1,0 +1,135 @@
+<div class="page">
+  <header class="page-head">
+    <div>
+      <h1>{{ greeting }}, {{ auth.firstName() }}</h1>
+      <p class="sub">Pick up where you left off.</p>
+    </div>
+    @if (home.data(); as h) {
+      @if (h.streakDays > 0) {
+        <span class="streak" [attr.aria-label]="h.streakDays + '-day learning streak'">
+          <app-icon name="flame" [size]="18" /> <strong>{{ h.streakDays }}-day</strong>&nbsp;streak
+        </span>
+      }
+    }
+  </header>
+
+  @switch (home.status()) {
+    @case ('loading') {
+      <div class="grid-2" aria-busy="true">
+        <div class="hero-skel skeleton" role="status" aria-label="Loading your home"></div>
+        <app-skeleton [lines]="2" class="card" />
+        <app-skeleton [lines]="5" class="card" />
+        <app-skeleton [lines]="4" class="card" />
+      </div>
+      @if (home.slow()) {
+        <p class="muted slow" role="status">Still loading — this is taking longer than usual.</p>
+      }
+    }
+    @case ('error') {
+      @if (noCourse()) {
+        <app-empty-state icon="compass" title="Choose a course to get started" text="Pick what you want to learn, or join your teacher’s class with the code they gave you.">
+          <a matButton="filled" routerLink="/onboarding">Choose a course</a>
+          <a matButton="outlined" routerLink="/join"><app-icon name="key" [size]="18" /> Join a class</a>
+        </app-empty-state>
+      } @else {
+        <app-error-state [error]="home.error()" title="We couldn’t load your home" (retry)="home.load()" />
+      }
+    }
+    @case ('ready') {
+      @if (home.data(); as h) {
+        <div class="grid-2">
+          <!-- Continue lesson hero -->
+          @if (h.continueLesson; as c) {
+            <section class="hero" aria-labelledby="hero-title">
+              <p class="hero-eyebrow">Continue · {{ c.courseTitle }} · Module {{ c.modulePosition }}</p>
+              <h2 id="hero-title" class="hero-title">{{ c.title }}</h2>
+              <p class="hero-text">Lesson {{ c.lessonPosition }} of {{ c.lessonCount }}. {{ c.summary }}</p>
+              <div class="hero-progress">
+                <div class="bar on-hero" aria-hidden="true"><div class="fill" [style.width.%]="c.percent"></div></div>
+                <span class="num">{{ c.percent }}% read</span>
+              </div>
+              <div class="hero-actions">
+                <a matButton="filled" class="btn-amber" [routerLink]="['/lessons', c.lessonId]">
+                  {{ c.percent > 0 ? 'Continue lesson' : 'Start lesson' }}
+                </a>
+                <a matButton="outlined" class="btn-on-dark" routerLink="/tutor" [queryParams]="{ lessonId: c.lessonId }">
+                  <app-icon name="tutor" [size]="18" /> Ask the tutor
+                </a>
+              </div>
+              <div class="hero-art" aria-hidden="true"></div>
+            </section>
+          } @else {
+            <section class="hero done" aria-labelledby="hero-title">
+              <p class="hero-eyebrow">{{ h.course.title }}</p>
+              <h2 id="hero-title" class="hero-title">You’ve finished every lesson</h2>
+              <p class="hero-text">Brilliant work. Keep it fresh with revision and practise your weakest topics.</p>
+              <div class="hero-actions"><a matButton="filled" class="btn-amber" routerLink="/course">Browse the course</a></div>
+            </section>
+          }
+
+          <!-- Revision -->
+          <section class="card revision" aria-labelledby="rev-title">
+            <div class="rev-top">
+              <span class="rev-icon" aria-hidden="true"><app-icon name="repeat" [size]="22" /></span>
+              <h2 id="rev-title">{{ h.revision.dueCount > 0 ? 'Revision due today' : 'Revision' }}</h2>
+            </div>
+            @if (h.revision.dueCount > 0) {
+              <p class="rev-count"><strong class="num">{{ h.revision.dueCount }}</strong> card{{ h.revision.dueCount === 1 ? '' : 's' }} · about {{ h.revision.estimatedMinutes }} minute{{ h.revision.estimatedMinutes === 1 ? '' : 's' }}</p>
+              <p class="muted small">Short, spaced reviews are the fastest way to remember for good.</p>
+              <a matButton="outlined" routerLink="/revision">Start revision</a>
+            } @else {
+              <p class="muted">Nothing due — you’re all caught up. New cards appear as you practise.</p>
+              <a matButton="text" routerLink="/revision">See your schedule</a>
+            }
+          </section>
+
+          <!-- Mastery -->
+          <section class="card" aria-labelledby="mastery-title">
+            <div class="card-title">
+              <h2 id="mastery-title">Your mastery</h2>
+              @if (masteryTop().length) { <a routerLink="/progress" class="see-all">See all</a> }
+            </div>
+            @if (masteryTop().length) {
+              <div class="stack">
+                @for (m of masteryTop(); track m.conceptId) {
+                  <app-mastery-bar [name]="m.name" [mastery]="m.mastery" [needsWork]="m.needsWork" [attempts]="m.attempts" />
+                }
+              </div>
+              @if (untriedCount() > 0) {
+                <p class="muted small untried"><app-icon name="star" [size]="14" /> {{ untriedCount() }} topic{{ untriedCount() === 1 ? '' : 's' }} not practised yet. <a routerLink="/practice">Try one</a></p>
+              }
+            } @else {
+              <app-empty-state [plain]="true" icon="chart" title="No mastery yet" text="Answer a few practice questions and your progress per topic shows up here.">
+                <a matButton="outlined" routerLink="/practice">Start practising</a>
+              </app-empty-state>
+            }
+          </section>
+
+          <!-- Study next -->
+          <section class="card" aria-labelledby="next-title">
+            <h2 id="next-title" class="card-title">Study next</h2>
+            @if (h.studyNext.length) {
+              <ul class="next">
+                @for (s of h.studyNext; track s.type + s.targetId) {
+                  <li>
+                    <button type="button" class="next-item" (click)="study.open(s, h.course.id)" [disabled]="study.busyId() === s.targetId">
+                      <span class="next-icon" [class]="s.type" aria-hidden="true"><app-icon [name]="icon[s.type]" [size]="18" /></span>
+                      <span class="next-body">
+                        <span class="pill">{{ s.title }}</span>
+                        <span class="sr-only"> — {{ label[s.type] }}. </span>
+                        <span class="next-reason">{{ s.reason }}</span>
+                      </span>
+                      <app-icon [name]="study.busyId() === s.targetId ? 'loader' : 'chevron-right'" [size]="18" class="chev" [class.spin]="study.busyId() === s.targetId" />
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="muted">You’re on track. Continue your lesson or ask the tutor anything.</p>
+            }
+          </section>
+        </div>
+      }
+    }
+  }
+</div>

@@ -1,0 +1,30 @@
+# syntax=docker/dockerfile:1
+# Sathi.Migrator (one-shot: EF Core migrations for schema app + seed) — build context: repository root
+#   docker build -f services/api/Dockerfile.migrator -t sathi-migrator .
+# Uses the aspnet runtime because Sathi.Core (Identity, DataProtection) depends on the ASP.NET Core shared framework.
+
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1
+
+COPY services/api/Directory.Build.props services/api/Directory.Packages.props services/api/
+COPY services/api/src/Sathi.Core/Sathi.Core.csproj services/api/src/Sathi.Core/
+COPY services/api/src/Sathi.Migrator/Sathi.Migrator.csproj services/api/src/Sathi.Migrator/
+RUN dotnet restore services/api/src/Sathi.Migrator/Sathi.Migrator.csproj
+
+COPY services/api/src/Sathi.Core/ services/api/src/Sathi.Core/
+COPY services/api/src/Sathi.Migrator/ services/api/src/Sathi.Migrator/
+RUN dotnet publish services/api/src/Sathi.Migrator/Sathi.Migrator.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+# libgssapi-krb5-2: Npgsql probes for GSSAPI on connect and logs an error when it is missing.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgssapi-krb5-2 \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+ENV DOTNET_ENVIRONMENT=Production \
+    Seed__ContentPath=/app/content/ai-engineering
+COPY --from=build /app/publish .
+COPY content/ai-engineering /app/content/ai-engineering
+USER $APP_UID
+ENTRYPOINT ["dotnet", "Sathi.Migrator.dll"]

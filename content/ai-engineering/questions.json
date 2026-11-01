@@ -1,0 +1,3424 @@
+[
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "In supervised training, what is the loss function used for?",
+    "explanation": "The loss turns the gap between predictions and targets into one number; training adjusts the parameters to make it small. It does not choose the architecture or split the data.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "To decide how many layers the model needs",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "To measure how wrong the model's predictions are, so the optimiser can reduce that number",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "To split the data into training and validation sets",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "To convert raw inputs into embeddings",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "Which loss is the standard choice for multi-class classification?",
+    "explanation": "Cross-entropy (log loss) compares predicted class probabilities with the true class and gives smooth, strong gradients. Accuracy is a metric, not a trainable loss, and MSE/MAE are meant for numeric targets.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Mean squared error",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Mean absolute error",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Accuracy",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Cross-entropy",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "Targets are [3, 5, 2] and predictions are [2.5, 5, 4]. What is the mean squared error?",
+    "explanation": "The errors are 0.5, 0 and -2; their squares are 0.25, 0 and 4, which sum to 4.25. Dividing by 3 gives about 1.417. 0.833 is the MAE, and 4.25 forgets to take the mean.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "About 1.417",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "About 0.833",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "4.25",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "2.5",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "A classifier assigns probability 0.1 to the correct class. What is its cross-entropy loss (natural log)?",
+    "explanation": "Cross-entropy is -ln(p_true) = -ln(0.1) ≈ 2.303. The value 0.105 is -ln(0.9), which would be the loss if the model had given the correct class 0.9.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "0.1",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "0.9",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "About 2.303",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "About 0.105",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "Why is accuracy usually not used directly as the training loss?",
+    "explanation": "Accuracy only changes when a prediction crosses the decision threshold, so small parameter changes usually leave it unchanged and its gradient is zero. Cross-entropy changes smoothly as probabilities move, so it always shows a direction to improve.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "It is too expensive to compute on large batches",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "It is flat almost everywhere, so it gives the optimiser no gradient signal",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "It can only be used for regression problems",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "It always overestimates how well the model performs",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "Compared with mean absolute error (MAE), mean squared error (MSE)...",
+    "explanation": "Squaring makes an error of 10 cost 100 while an error of 2 costs 4, so a few large errors dominate MSE. MAE grows linearly and is more robust. Neither loss can be negative.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "penalises large errors much more heavily, so it is more sensitive to outliers",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "treats all errors the same regardless of their size",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "can become negative when predictions are too high",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "is only defined for classification problems",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "An untrained 10-class classifier outputs uniform probabilities. Roughly what cross-entropy loss should it start with?",
+    "explanation": "Uniform probabilities give the correct class p = 1/10, so the loss is -ln(0.1) = ln 10 ≈ 2.303. This makes a useful sanity check: a starting loss far above ln C suggests a bug.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "0.1",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "1.0",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "10",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "About 2.303",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "mcq",
+    "stem": "An input has several plausible targets. Minimising mean squared error drives the model to predict which summary of them?",
+    "explanation": "The value that minimises the average squared error is the mean. Minimising absolute error instead gives the median, which is why MAE is more robust to outliers.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The median",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The most frequent value",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The mean",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "The largest value",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "loss-functions",
+    "lesson": "what-a-model-learns",
+    "type": "short",
+    "stem": "Explain why cross-entropy is preferred over accuracy as the training loss for a classifier.",
+    "explanation": "Accuracy has no useful gradient; cross-entropy is smooth and punishes confident mistakes.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "States that accuracy is flat or piecewise constant, so it gives (almost) no gradient for the optimiser",
+          "points": 2
+        },
+        {
+          "id": "c2",
+          "description": "States that cross-entropy is smooth/differentiable and changes as the predicted probabilities change",
+          "points": 1
+        },
+        {
+          "id": "c3",
+          "description": "Mentions that cross-entropy strongly penalises confident wrong predictions (loss grows as -ln p)",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "Accuracy only changes when a prediction crosses the decision threshold, so for small weight changes it stays the same and its gradient is zero almost everywhere; gradient descent gets no signal. Cross-entropy, -ln(p of the true class), changes smoothly whenever probabilities shift, so there is always a direction to improve, and it punishes confident wrong answers heavily because the loss grows without bound as that probability approaches zero."
+    }
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "mcq",
+    "stem": "In the update θ ← θ − η∇L(θ), what does η control?",
+    "explanation": "η is the learning rate: it scales the gradient to decide how far each update moves the parameters. Batch size and regularisation strength are separate hyperparameters.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The number of layers in the model",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The batch size",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The size of each step (the learning rate)",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "The strength of regularisation",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "mcq",
+    "stem": "Why does gradient descent subtract the gradient rather than add it?",
+    "explanation": "The gradient points uphill. Stepping against it moves downhill on the loss surface. Adding it would make the loss rise.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The gradient points in the direction of steepest increase, so moving the opposite way decreases the loss",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Subtraction is cheaper than addition on GPUs",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The gradient is always negative",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "To keep all weights positive",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "mcq",
+    "stem": "For L(w) = (w − 3)², starting at w = 0 with learning rate 0.1, what is w after one gradient descent step?",
+    "explanation": "The gradient is 2(w − 3) = −6 at w = 0. The update is w = 0 − 0.1 × (−6) = 0.6. Getting −0.6 means the gradient was added instead of subtracted.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "−0.6",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "0.6",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "0.3",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "6.0",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "mcq",
+    "stem": "Your training loss rises every step and soon becomes NaN. What is the most sensible first fix?",
+    "explanation": "A loss that grows and then becomes NaN is the classic sign of steps that overshoot and diverge. Reducing the learning rate (often by 3–10×) is the first thing to try.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Increase the learning rate",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Add more layers",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Delete the validation set",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Reduce the learning rate",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "mcq",
+    "stem": "What is mini-batch gradient descent?",
+    "explanation": "Mini-batch gradient descent averages the gradient over a small random batch (for example 32–1024 examples). It is far cheaper than full-batch descent, and its noise can even help generalisation.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Using the whole training set to compute every step",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Estimating the gradient from a small random subset of examples at each step",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "Updating one parameter at a time",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Training only the last layer of a network",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "training-neural-networks-in-practice",
+    "type": "mcq",
+    "stem": "What is one epoch?",
+    "explanation": "An epoch is one pass over every training example. With 50,000 examples and batch size 128, one epoch is 391 steps.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "A single optimiser step",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "A single mini-batch",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "One full pass over the training data",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "The time until the loss stops improving",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "mcq",
+    "stem": "For L(w) = (w − 3)², which learning rate makes gradient descent diverge?",
+    "explanation": "Each step multiplies the distance to the minimum by (1 − 2η). For η = 1.1 that factor is −1.2, so the distance grows every step. η = 0.9 gives −0.8, which oscillates but still converges; η = 0.5 jumps straight to the minimum.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "1.1",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "0.1",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "0.5",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "0.9",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "mcq",
+    "stem": "What does the Adam optimiser add compared with plain SGD?",
+    "explanation": "Adam keeps a momentum-like average m of gradients and an average v of squared gradients and steps by roughly η·m/√v. It still needs a learning rate and does not guarantee a global minimum.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "It computes exact second derivatives (the Hessian) at every step",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "It guarantees finding the global minimum",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "It removes the need for a learning rate",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Running averages of the gradients (momentum) and of squared gradients, giving each parameter its own effective step size",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gradient-descent",
+    "type": "short",
+    "stem": "For L(w) = (w − 3)², start at w = 0 with learning rate 0.1. Compute w after one gradient descent step and explain each part of the update.",
+    "explanation": "Gradient −6, new w = 0.6; subtracting the gradient moves downhill, scaled by the learning rate.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Computes the gradient correctly: dL/dw = 2(w − 3) = −6 at w = 0",
+          "points": 1
+        },
+        {
+          "id": "c2",
+          "description": "Gets the new value w = 0.6 with the correct sign (subtracting η times the gradient)",
+          "points": 2
+        },
+        {
+          "id": "c3",
+          "description": "Explains that the gradient points uphill so we step against it, and the learning rate sets the step size",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "The derivative is dL/dw = 2(w − 3), which is −6 at w = 0. The update is w ← w − η·gradient = 0 − 0.1 × (−6) = 0.6. We subtract because the gradient points in the direction of steepest increase, so stepping against it lowers the loss; the learning rate 0.1 scales how far we move. The loss drops from 9 to 5.76."
+    }
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "Training loss keeps falling while validation loss starts to rise. This is a sign of:",
+    "explanation": "A widening gap, with training loss still improving and validation loss getting worse, means the model is memorising training data rather than learning patterns that generalise.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Overfitting",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Underfitting",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "A learning rate that is too small",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "A perfectly tuned model",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "What is the validation set used for?",
+    "explanation": "The validation set guides decisions such as λ, learning rate and early stopping. The test set, not the validation set, is the one you touch once at the end.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Computing the gradients for each update",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Reporting one final, untouched number at the end of the project",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Choosing hyperparameters and deciding when to stop training",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "Generating augmented training examples",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "With weights w = [3, −1, 0.5] and λ = 0.1, what is the L2 penalty λ·Σw²?",
+    "explanation": "Σw² = 9 + 1 + 0.25 = 10.25, and 0.1 × 10.25 = 1.025. The value 0.45 is the L1 penalty (0.1 × (3 + 1 + 0.5)); 10.25 forgets to multiply by λ.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "0.45",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "0.25",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "10.25",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "1.025",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "Why does L1 regularisation tend to produce weights that are exactly zero?",
+    "explanation": "The L1 gradient is λ·sign(w), the same size for tiny and large weights, so small weights get pushed all the way to zero. L2's push (2λw) shrinks as the weight shrinks, so weights get small but rarely exactly zero. Randomly zeroing units is dropout.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "It squares the weights, so small ones become negligible",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Its gradient is a constant-size push towards zero regardless of a weight's magnitude, so small weights reach exactly zero",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "It only applies to bias terms",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "It randomly sets weights to zero at each step",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "What does dropout do during training?",
+    "explanation": "Dropout zeroes random activations each step, so the network cannot rely on any single unit. Stopping on validation loss is early stopping, a different technique.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Removes difficult examples from the training set",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Randomly sets hidden activations to zero with probability p",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "Stops training when validation loss stops improving",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Halves the learning rate every epoch",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "Training loss is 0.85 and validation loss is 0.88, both well above what similar models achieve. What is the best next step?",
+    "explanation": "Both losses are high and close together, which indicates underfitting (high bias). More regularisation would make it worse; the model needs more capacity or more training.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Increase model capacity or train longer, because the model is underfitting",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Add much stronger regularisation",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Remove half of the training data",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Use early stopping, because the model is overfitting",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "You normalise features using the mean and standard deviation of the entire dataset, then split it into train and validation sets. What is the problem?",
+    "explanation": "This is data leakage: the training pipeline has seen information from the validation data. Compute normalisation statistics on the training split only, then apply them to the other splits.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "There is no problem; normalisation is unrelated to splitting",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "It only makes training slower",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Validation statistics leak into training, so validation scores become optimistic",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "It forces the model to underfit",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "mcq",
+    "stem": "With inverted dropout and p = 0.5, what happens to the surviving activations during training, and what happens at inference?",
+    "explanation": "Inverted dropout scales kept activations by 1/(1 − p) = 2 so their expected value is unchanged, which lets inference run with dropout switched off and no rescaling. Leaving dropout on at inference makes predictions random.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "They are multiplied by 0.5 during training, and dropout stays on at inference",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "They are left unchanged, and half the units are still dropped at inference",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "They are multiplied by 2 during training, and dropout stays on at inference",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "They are multiplied by 2 during training, and dropout is switched off at inference",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "regularization",
+    "lesson": "overfitting-and-regularization",
+    "type": "short",
+    "stem": "Training loss falls steadily, but validation loss has started rising. Diagnose the problem and suggest two remedies.",
+    "explanation": "Overfitting; remedies include early stopping, weight decay, dropout, more data or a smaller model.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Identifies overfitting (the model memorises training data and fails to generalise)",
+          "points": 2
+        },
+        {
+          "id": "c2",
+          "description": "Gives at least two valid remedies, e.g. early stopping, L2/weight decay, dropout, more or augmented data, a smaller model (1 point each, max 2)",
+          "points": 2
+        }
+      ],
+      "modelAnswer": "This is overfitting: the model keeps fitting the training data, including its noise, while performance on unseen data gets worse. Remedies: use early stopping and keep the weights from the best validation point; add L2 regularisation (weight decay) or dropout; collect more data or use data augmentation; or reduce model capacity."
+    }
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "Why do neural networks need non-linear activation functions?",
+    "explanation": "W₂(W₁x) = (W₂W₁)x, so purely linear layers add no expressive power. A non-linearity between layers lets the network model curved functions and decision boundaries.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "To make matrix multiplication faster",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Without them, any stack of linear layers collapses into a single linear transformation",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "To keep all weights positive",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "To normalise the inputs",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "What is ReLU(−2)?",
+    "explanation": "ReLU(z) = max(0, z), so any negative input becomes 0. The value 0.12 is roughly sigmoid(−2), a different activation.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "−2",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "2",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "0.12",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "0",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "What is the maximum value of the derivative of the sigmoid function?",
+    "explanation": "σ'(z) = σ(z)(1 − σ(z)), which is largest when σ(z) = 0.5, giving 0.5 × 0.5 = 0.25. The value 0.5 is σ(0) itself, not its derivative. This small maximum is why deep sigmoid networks suffer from vanishing gradients.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "1",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "0.5",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "0.25",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "0.1",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "A neuron has x = [1, 2], w = [0.5, −0.25] and b = 0.1. What are its pre-activation z and its ReLU output?",
+    "explanation": "z = 0.5×1 + (−0.25)×2 + 0.1 = 0.5 − 0.5 + 0.1 = 0.1. Since z > 0, ReLU passes it through unchanged: 0.1.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "z = 0.1 and ReLU(z) = 0.1",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "z = 0.1 and ReLU(z) = 0",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "z = −0.1 and ReLU(z) = 0",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "z = 1.1 and ReLU(z) = 1.1",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "Which activation is the usual choice for the output of a binary classifier?",
+    "explanation": "Sigmoid maps any score to (0, 1), which can be read as the probability of the positive class and pairs naturally with binary cross-entropy. ReLU outputs are unbounded and not probabilities.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "ReLU",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Tanh",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Sigmoid",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "No activation at all",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "What is a 'dead ReLU'?",
+    "explanation": "When z < 0 for all inputs, ReLU's derivative is 0 everywhere, so no gradient reaches the neuron's weights and it stays off permanently. Leaky ReLU avoids this with a small negative slope.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "A neuron whose output is always exactly 1",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "A neuron whose pre-activation is negative for every input, so its gradient is always zero and it never updates",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "A ReLU that has been replaced by GELU",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "A neuron temporarily removed by dropout",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "Through 10 sigmoid layers, even in the best case, the gradient reaching the first layer is scaled by roughly:",
+    "explanation": "Each sigmoid layer multiplies the gradient by at most 0.25, so ten layers give 0.25¹⁰ = 1/1,048,576 ≈ 9.5 × 10⁻⁷. This is the vanishing-gradient problem that ReLU-family activations largely solve.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "0.25",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "2.5",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "0.025",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "9.5 × 10⁻⁷",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "mcq",
+    "stem": "You apply softmax to your model's outputs and then pass them to PyTorch's CrossEntropyLoss. What happens?",
+    "explanation": "CrossEntropyLoss applies log-softmax internally and expects logits. Passing probabilities squashes them again, flattening the distribution and weakening gradients, with no error to warn you.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Softmax is effectively applied twice, because the loss expects raw logits; training still runs but is weakened",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Nothing; this is the recommended usage",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The loss becomes negative",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "PyTorch raises an error",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "activation-functions",
+    "lesson": "neurons-and-activation-functions",
+    "type": "short",
+    "stem": "Why does a deep network need non-linear activation functions? Give a short mathematical argument.",
+    "explanation": "Linear layers compose into one linear layer; non-linearities let depth add expressive power.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Shows or states that stacked linear layers collapse to one linear map, e.g. W₂(W₁x) = (W₂W₁)x",
+          "points": 2
+        },
+        {
+          "id": "c2",
+          "description": "Explains that non-linearities let the network represent curved functions / non-linear decision boundaries, so depth adds power",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "Without activations, two layers compute y = W₂(W₁x) = (W₂W₁)x = Wx, which is just one linear layer; any number of linear layers collapses the same way and can only draw straight (linear) decision boundaries. Putting a non-linearity such as ReLU between layers breaks this collapse, so each layer can bend the representation and the network can approximate complex, non-linear functions."
+    }
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "Which statement about the chain rule in backpropagation is correct?",
+    "explanation": "Backpropagation moves from the output backward. Each layer takes the gradient arriving from above and multiplies it by its own local derivative.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "Gradients are computed from the input forward",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Each layer multiplies the incoming gradient by its local derivative",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "Weights are updated before gradients exist",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Only the final layer receives a gradient",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "In which direction do gradients flow during backpropagation?",
+    "explanation": "Values flow forward during the forward pass; gradients flow backward, starting from the loss (where ∂L/∂L = 1) and moving towards the input.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "From the loss at the output back towards the input",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "From the input forward to the output",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "In a random order chosen each step",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Only within the output layer",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "What is the difference between backpropagation and gradient descent?",
+    "explanation": "Backpropagation is the method for computing ∂L/∂θ efficiently. An optimiser such as SGD or Adam then uses those gradients to change the weights. Option B has the roles reversed.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "They are two names for the same algorithm",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Backpropagation updates the weights; gradient descent computes the gradients",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Backpropagation computes the gradients; gradient descent (the optimiser) uses them to update the weights",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "Backpropagation is only used for convolutional networks",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "A network computes z = w₁x, h = ReLU(z), ŷ = w₂h and L = (ŷ − y)². With x = 2, y = 1, w₁ = 0.5 and w₂ = 3, what is ∂L/∂w₂?",
+    "explanation": "Forward: z = 1, h = 1, ŷ = 3, L = 4. Backward: ∂L/∂ŷ = 2(ŷ − y) = 4, and the local derivative of ŷ with respect to w₂ is h = 1, so ∂L/∂w₂ = 4 × 1 = 4. The value 12 is ∂L/∂h.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "12",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "24",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "2",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "4",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "Same network: z = w₁x, h = ReLU(z), ŷ = w₂h, L = (ŷ − y)², with x = 2, y = 1, w₁ = 0.5, w₂ = 3. What is ∂L/∂w₁?",
+    "explanation": "∂L/∂ŷ = 4; times w₂ = 3 gives ∂L/∂h = 12; ReLU's local derivative is 1 since z > 0, so ∂L/∂z = 12; times x = 2 gives ∂L/∂w₁ = 24. Stopping at 12 forgets the last local derivative.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "4",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "12",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "24",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "48",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "A value feeds into two different later nodes. During the backward pass, how are the gradients from the two paths combined?",
+    "explanation": "By the multivariable chain rule, the total gradient is the sum of the contributions along every path. That is why frameworks accumulate gradients.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "They are added",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "They are multiplied",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Only the larger one is kept",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Only the first path is used",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "Why do frameworks keep the forward-pass activations in memory during training?",
+    "explanation": "Local derivatives depend on forward values, e.g. ∂(w·h)/∂w = h. Caching them avoids recomputation and is why training uses much more memory than inference.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Only for logging and visualisation",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The backward pass needs them to compute local derivatives",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "To speed up inference later",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Because dropout requires it",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "mcq",
+    "stem": "After loss.backward(), a parameter's .grad is None. What is the most likely cause?",
+    "explanation": "Autograd only fills .grad for parameters that require gradients and contributed to the loss. An inactive ReLU gives a gradient of 0, not None; exploding gradients show up as huge or NaN values.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The learning rate is too high",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "A ReLU in front of it was inactive, so its gradient is exactly zero",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Its gradient exploded",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The parameter is not on the computation path to the loss (or does not require gradients)",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "backpropagation",
+    "lesson": "backpropagation-and-the-chain-rule",
+    "type": "short",
+    "stem": "Describe what happens during the backward pass of backpropagation and why it is efficient.",
+    "explanation": "Start at the loss, move backward, multiply incoming gradient by each local derivative, reuse results.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "States that the backward pass starts at the loss and moves from the output backward towards the input",
+          "points": 1
+        },
+        {
+          "id": "c2",
+          "description": "Explains that each layer/node multiplies the incoming (upstream) gradient by its own local derivative (the chain rule)",
+          "points": 2
+        },
+        {
+          "id": "c3",
+          "description": "Explains efficiency: upstream gradients and cached forward values are reused, so all gradients cost about one extra pass rather than one pass per parameter",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "After the forward pass caches intermediate values, the backward pass starts at the loss with gradient 1 and moves from the output backward. Each layer takes the gradient arriving from above, multiplies it by its own local derivative (chain rule), and passes the result to the layer before it; where a value fans out, gradients are summed. It is efficient because each layer's gradient is built from the one above it and from cached activations, so computing every parameter's gradient costs roughly one extra pass through the network instead of one forward pass per parameter."
+    }
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "What is the main advantage of embeddings over one-hot vectors?",
+    "explanation": "One-hot vectors make every pair of tokens equally different. Embeddings are learned so similar items get similar vectors, turning similarity into geometry.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "They are longer, so they hold more information",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "They are sparse, so they use less memory per token",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "They are dense learned vectors in which related items end up close together",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "They do not need any training",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "How is an embedding layer typically implemented?",
+    "explanation": "An embedding layer is a trainable matrix; token i is represented by row i. The lookup is equivalent to multiplying a one-hot vector by the matrix, but much cheaper.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "As a lookup table: a V × d matrix with one row per token",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "As a cryptographic hash of the token text",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "As a sorting step over the vocabulary",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "As a convolution over characters",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "What is the cosine similarity of the vectors [1, 0] and [1, 1]?",
+    "explanation": "The dot product is 1, and the lengths are 1 and √2, so cosine = 1/√2 ≈ 0.707. The vectors are 45° apart, so they are related but not identical.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "1.0",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "About 0.707",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "0.5",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "0",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "If all embeddings are normalised to unit length, which statement is true?",
+    "explanation": "With ‖a‖ = ‖b‖ = 1, cos(a, b) = a·b, and ‖a − b‖² = 2 − 2cos(a, b), so all three measures agree on ranking. Systems normalise once and then use the cheap dot product.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Cosine similarity and dot product give different rankings",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Euclidean distance becomes meaningless",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Every dot product equals 1",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The dot product equals cosine similarity, so it ranks results identically",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "You switched to a new embedding model for new documents but kept the old model's vectors for existing documents. What happens?",
+    "explanation": "Each model defines its own vector space. Comparing a query from one model with documents from another produces arbitrary scores, often with no error. Re-embed everything when you change models.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Nothing; all embedding vectors are compatible",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Old documents are found faster than new ones",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Similarity between vectors from different models is meaningless, so search quality silently degrades",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "The database rejects vectors from the second model",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "An embedding table has a vocabulary of 50,000 tokens and dimension 768. How many parameters does it hold?",
+    "explanation": "One row of 768 numbers per token: 50,000 × 768 = 38,400,000. Adding the two numbers (50,768) is a common slip.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "50,768",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "38,400,000",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "3,840,000",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "768",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "Let a = [1, 2, 2] and c = [2, 4, 4]. Which statement is correct?",
+    "explanation": "c = 2a, so the angle between them is zero and cosine = 18/(3 × 6) = 1. Euclidean distance still sees the length difference: ‖a − c‖ = ‖[−1, −2, −2]‖ = 3. The dot product is 18.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Their cosine similarity is 1 because c points in the same direction as a, even though their Euclidean distance is 3",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Their cosine similarity is 0.5 because c is twice as long",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Their Euclidean distance is 0 because they point the same way",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Their dot product is 9",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "mcq",
+    "stem": "Which training objective is typically used for sentence-embedding models that power semantic search?",
+    "explanation": "Contrastive training directly optimises the geometry search needs: queries land near the passages that answer them, even with few shared words.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Predicting only the next token",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Minimising the squared difference between sentence lengths",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Classifying every sentence into a fixed list of topics",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "A contrastive objective that pulls matching pairs (such as a question and its answering passage) together and pushes non-matching pairs apart",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "embeddings-and-similarity",
+    "type": "short",
+    "stem": "What is cosine similarity, and why is it often preferred over the raw dot product for comparing embeddings?",
+    "explanation": "Cosine compares direction only, so vector length does not distort rankings.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Defines cosine similarity as the dot product divided by the product of the vector lengths (or the cosine of the angle between them)",
+          "points": 1
+        },
+        {
+          "id": "c2",
+          "description": "Explains that it ignores vector length/magnitude, so long vectors do not win just by being long",
+          "points": 2
+        },
+        {
+          "id": "c3",
+          "description": "Adds a correct detail: range −1 to 1, or that for unit-normalised vectors it equals the dot product",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "Cosine similarity is a·b / (‖a‖‖b‖), the cosine of the angle between the vectors, ranging from −1 to 1. It measures direction only, so a vector does not score highly just because it is long; the raw dot product grows with length and can rank a long but less related vector above a closer match. If embeddings are normalised to unit length, the dot product and cosine are identical, which is why many systems normalise once and then use the dot product."
+    }
+  },
+  {
+    "concept": "attention",
+    "lesson": "attention-basics",
+    "type": "mcq",
+    "stem": "What does an attention layer output for each query?",
+    "explanation": "Attention is a soft lookup: every value contributes in proportion to its weight. It only behaves like picking one item when the softmax saturates.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The single value whose key has the highest score",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "A weighted average of all the value vectors, with weights from a softmax over query–key scores",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "The sum of all key vectors",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The query vector unchanged",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "attention-basics",
+    "type": "mcq",
+    "stem": "Which statement about the attention weights for one query is true?",
+    "explanation": "The weights are the softmax of the scores, so they are positive and sum to one. They are recomputed for every input; the learned parameters are the projection matrices.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "They can be negative",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "They are fixed parameters learned once during training",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "They sum to the sequence length",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "They are non-negative and sum to one",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "scaled-dot-product-attention",
+    "type": "mcq",
+    "stem": "Why does scaled dot-product attention divide the scores by √d_k?",
+    "explanation": "With unit-variance entries, q·k has variance d_k. Unscaled, the softmax becomes nearly one-hot and its gradients vanish. Dividing by √d_k restores unit variance. The softmax already makes the weights sum to one, so that is not the reason.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "Dot products grow with dimension (variance d_k), and large scores saturate the softmax towards one-hot, making gradients tiny",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "To make the matrix multiplication run faster",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "To normalise the value vectors to unit length",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "To make the attention weights sum to one",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "scaled-dot-product-attention",
+    "type": "mcq",
+    "stem": "Query and key entries are independent with mean 0 and variance 1. What is the variance of q·k when d_k = 64?",
+    "explanation": "Each term q_i·k_i has variance 1, and the variances of 64 independent terms add to 64. The standard deviation is √64 = 8, which is why we divide by 8.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "1",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "8",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "64",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "4,096",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "queries-keys-and-values",
+    "type": "mcq",
+    "stem": "In self-attention, where do the queries, keys and values come from?",
+    "explanation": "Q = XW_Q, K = XW_K, V = XW_V: one input sequence, three learned projections. In cross-attention, by contrast, the keys and values come from a different sequence.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Three different input sequences",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Three learned linear projections of the same token embeddings",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "The keys come from the labels and the values from the loss",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The values are random vectors resampled each step",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "queries-keys-and-values",
+    "type": "mcq",
+    "stem": "How should a causal mask be applied in attention?",
+    "explanation": "Adding −∞ before the softmax gives e^(−∞) = 0 and keeps each row summing to one. Zeroing weights after the softmax breaks that sum, and multiplying a score by zero gives a score of 0, which still receives positive weight.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Set the weights of future tokens to zero after the softmax",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Remove only the future tokens' value vectors",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Multiply the scores of future positions by zero",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Add −∞ to the scores of future positions before the softmax, so their weights become exactly zero",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "scaled-dot-product-attention",
+    "type": "mcq",
+    "stem": "With d_k = 4, q = [1, 0, 1, 0], k₁ = [2, 1, 2, 0] and k₂ = [0, 1, 0, 2], what are the attention weights?",
+    "explanation": "Raw scores are 4 and 0; dividing by √4 = 2 gives 2 and 0; softmax gives e²/(e² + 1) ≈ 0.881 and 0.119. The answer [0.982, 0.018] is what you get if you forget to scale.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "About [0.881, 0.119]",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "About [0.982, 0.018]",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Exactly [1, 0]",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "[0.5, 0.5]",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "queries-keys-and-values",
+    "type": "mcq",
+    "stem": "In the 'soft dictionary lookup' view of attention, which vector carries the information that gets returned?",
+    "explanation": "Queries are compared with keys to compute weights; the weights then average the values. Keys decide who is selected, values are what is handed over.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The query",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The key",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The value",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "The score",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "scaled-dot-product-attention",
+    "type": "short",
+    "stem": "Explain why scaled dot-product attention divides the query–key scores by √d_k.",
+    "explanation": "Dot-product variance grows with d_k; large scores saturate softmax and shrink gradients; scaling restores unit variance.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "States that dot-product scores grow with dimension: with unit-variance entries the variance is d_k (standard deviation √d_k)",
+          "points": 1
+        },
+        {
+          "id": "c2",
+          "description": "Explains that large scores push the softmax towards a one-hot (saturated) distribution",
+          "points": 1
+        },
+        {
+          "id": "c3",
+          "description": "Explains that a saturated softmax has tiny gradients, so attention learns slowly or not at all",
+          "points": 1
+        },
+        {
+          "id": "c4",
+          "description": "States that dividing by √d_k brings the score variance back to about 1, independent of dimension",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "If query and key entries have mean 0 and variance 1, the dot product sums d_k terms of variance 1, so its variance is d_k and its typical size is √d_k (8 for d_k = 64). Softmax depends exponentially on score differences, so such large scores make it nearly one-hot. In that saturated regime the softmax Jacobian α_i(δ_ij − α_j) is close to zero, so gradients into W_Q and W_K vanish and the model barely learns. Dividing by √d_k rescales the scores to unit variance at any dimension, keeping the softmax responsive and gradients healthy."
+    }
+  },
+  {
+    "concept": "transformers",
+    "lesson": "multi-head-attention",
+    "type": "mcq",
+    "stem": "With d_model = 512 and 8 attention heads, what is each head's dimension d_k?",
+    "explanation": "d_k = d_model / h = 512 / 8 = 64, so each head scales its scores by √64 = 8.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "64",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "512",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "8",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "4,096",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "positional-information",
+    "type": "mcq",
+    "stem": "Why do Transformers need positional information?",
+    "explanation": "Shuffling the input to self-attention just shuffles the outputs; 'dog bites man' and 'man bites dog' look the same. Positional encodings put order back.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "To reduce memory usage",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "To make the softmax faster",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Self-attention is permutation-equivariant, so without it the model cannot tell word order",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "To split text into tokens",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "the-transformer-block",
+    "type": "mcq",
+    "stem": "What is the role of residual connections in a Transformer block?",
+    "explanation": "x + f(x) has derivative 1 + f'(x), so gradients can flow straight through many blocks. Normalisation is LayerNorm's job, not the residual's.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "They replace the attention sub-layer",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "They normalise each token's vector to zero mean",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "They shuffle tokens between layers",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "They add each sub-layer's output to its input, giving gradients a direct path to earlier layers",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "multi-head-attention",
+    "type": "mcq",
+    "stem": "With d_model = 512, how does the parameter count of 8 heads of size 64 compare with one head of size 512?",
+    "explanation": "In both cases W_Q, W_K, W_V and W_O are 512 × 512 in total: 4 × 262,144 = 1,048,576 weights. Multi-head attention splits the same budget into subspaces.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Eight times larger",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The same",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "One eighth",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "It depends on the sequence length",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "positional-information",
+    "type": "mcq",
+    "stem": "What does RoPE (rotary position embedding) do?",
+    "explanation": "Rotating q by mθ and k by nθ changes their angle by (m − n)θ, so scores depend on relative distance. RoPE is applied to queries and keys, not values.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Rotates query and key vectors by angles proportional to their positions, so their dot product depends on the relative offset",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Adds random noise to embeddings so the model ignores position",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Concatenates the raw position index to each embedding",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Rotates only the value vectors",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "the-transformer-block",
+    "type": "mcq",
+    "stem": "What does the feed-forward network inside a Transformer block do?",
+    "explanation": "The FFN is position-wise: the same MLP is applied to every token separately. Only attention moves information between tokens.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Mixes information between different tokens",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Processes each token's vector independently with the same two-layer MLP",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "Computes the attention weights",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Normalises the residual stream",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "the-transformer-block",
+    "type": "mcq",
+    "stem": "In a standard Transformer block with d_ff = 4·d_model, roughly what share of the block's weights are in the feed-forward network?",
+    "explanation": "Attention has 4·d² weights (Q, K, V, O) and the FFN has 2 × d × 4d = 8·d², so the FFN holds 8/12 ≈ two thirds.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "One third",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "One half",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Two thirds",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "Over 90%",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "multi-head-attention",
+    "type": "mcq",
+    "stem": "A model has 32 layers, 32 heads, d_k = 128 and stores 16-bit values. What is the KV cache size for one 4,096-token sequence?",
+    "explanation": "2 (K and V) × 32 layers × 32 heads × 128 × 4,096 tokens × 2 bytes = 2,147,483,648 bytes = 2 GiB. Forgetting the factor 2 for keys and values gives 1 GiB.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "256 MiB",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "1 GiB",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "4 GiB",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "2 GiB",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "transformers",
+    "lesson": "positional-information",
+    "type": "short",
+    "stem": "Why does a Transformer need positional information, and how does RoPE provide it?",
+    "explanation": "Attention is order-blind; RoPE rotates queries and keys by position so scores depend on relative offset.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Explains that self-attention is permutation-equivariant / treats input as a set, so word order is invisible without positional information",
+          "points": 2
+        },
+        {
+          "id": "c2",
+          "description": "States that RoPE rotates query and key vectors (pairs of dimensions) by angles proportional to position",
+          "points": 1
+        },
+        {
+          "id": "c3",
+          "description": "Explains that the query–key dot product then depends on the relative offset between positions",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "Self-attention compares every token with every other token regardless of where they are, so permuting the input only permutes the output; without positional information 'dog bites man' and 'man bites dog' look identical. RoPE rotates each 2-D pair of dimensions in the query and key vectors by an angle proportional to the token's position. A query at position m and a key at position n then differ in angle by (m − n)θ, so their score depends on the relative distance, not the absolute positions."
+    }
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "Why are documents split into chunks before embedding them for retrieval?",
+    "explanation": "Chunks are small enough to embed precisely and to fit several into the context window, but large enough to hold a complete thought.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Embedding models can only read one sentence at a time",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "To compress the documents",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "To remove duplicate documents",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "One vector for a long document blurs many topics together, and whole documents do not fit in the prompt",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "What is the purpose of overlap between consecutive chunks?",
+    "explanation": "Overlap repeats a few tokens across a boundary so a key sentence is not cut in half everywhere. It increases storage and embedding cost rather than reducing it.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "So that content straddling a chunk boundary appears whole in at least one chunk",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "To reduce storage",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "To make embedding faster",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "To remove duplicate sentences",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "A 10,000-token document is split into 500-token chunks with 100 tokens of overlap. How many chunks are produced?",
+    "explanation": "The stride is 500 − 100 = 400, so chunks start at 0, 400, …, 9,600. That is 9,600/400 + 1 = 25 chunks (the last holds 400 tokens). Without overlap it would be 20.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "20",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "24",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "25",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "100",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "Why can a very large chunk rank poorly even though it contains the answer?",
+    "explanation": "One vector has to summarise everything in the chunk. The more unrelated material it contains, the less it resembles any focused question.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Large chunks crash the embedding model",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Its embedding is diluted by unrelated content, so it is less similar to a specific query",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "Vector databases delete large chunks",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Keyword search ignores large chunks",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "Which metadata is most useful to store with each chunk to support citations?",
+    "explanation": "Title, page and section path let the tutor cite 'Lecture 3 notes, page 2' and let the system filter by source. Prepending the heading path before embedding also improves retrieval.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The embedding model's training loss",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The chunk's size in bytes",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The document title, page number and heading path",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "Only a hash of the text",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "What is structure-aware chunking?",
+    "explanation": "Headings and page boundaries usually mark topic changes, so splitting there keeps related content together. Fixed-size splitting ignores structure and can cut through sentences.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Splitting at random positions",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Splitting exactly every N characters",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Translating documents before splitting",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Splitting along the document's own boundaries, such as headings, sections, pages or slides",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "A chunk exceeds the embedding model's maximum input length. What usually happens?",
+    "explanation": "Most embedding APIs and models truncate silently, so the tail of the chunk becomes unfindable. Measure chunk sizes in the embedding model's tokens.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Text beyond the limit is silently truncated and never represented in the vector",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "The model automatically splits it into two vectors",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "An error is always raised",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The embedding vector becomes longer",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "mcq",
+    "stem": "In parent–child retrieval, what is indexed and what is sent to the model?",
+    "explanation": "Small chunks match queries sharply; their parent sections give the model enough surrounding context to answer well.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Large parent sections are indexed, and small child chunks are sent",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Small child chunks are indexed for precise matching, and their larger parent section is sent for context",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "The same chunks are both indexed and sent",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Only document titles are indexed",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "chunking",
+    "lesson": "chunking-documents",
+    "type": "short",
+    "stem": "Explain the trade-off when choosing a chunk size for a RAG system.",
+    "explanation": "Small chunks lose context; large chunks dilute embeddings and waste context; tune on an evaluation set.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Explains that chunks that are too small lose context (e.g. unresolved references) and more of them are needed",
+          "points": 1
+        },
+        {
+          "id": "c2",
+          "description": "Explains that chunks that are too large have diluted embeddings that rank poorly and consume the context window",
+          "points": 1
+        },
+        {
+          "id": "c3",
+          "description": "Suggests a sound way to handle it: test a few sizes on an evaluation set, use overlap, or use structure-aware or parent–child chunking",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "Small chunks are precise but lose context: a sentence like 'it is divided by √d_k' is useless without saying what 'it' is, and answers need many chunks. Large chunks contain more context but their single embedding averages many topics, so they match specific queries poorly and use up the context window. A typical starting point is a few hundred tokens with 10–20% overlap, split along headings, then measured on real questions; parent–child retrieval can combine precise matching with fuller context."
+    }
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "What does an approximate nearest neighbour (ANN) index give up in order to search quickly?",
+    "explanation": "ANN indexes examine only a small part of the collection, so they may miss some true neighbours. Their quality is measured as recall against exact search.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The ability to store vectors on disk",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The guarantee of returning the exact top-k neighbours",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "Support for cosine similarity",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The ability to return more than one result",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "In pgvector, which operator computes cosine distance?",
+    "explanation": "<=> is cosine distance, <-> is Euclidean (L2) distance and <#> is negative inner product. @@ is Postgres full-text matching.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "<->",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "<#>",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "@@",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "<=>",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "In an HNSW index, what is the effect of raising ef_search?",
+    "explanation": "ef_search is the size of the candidate list kept during a query. A bigger list explores more of the graph, finding more true neighbours but taking longer.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "Higher recall at the cost of higher query latency",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Lower memory use for the index",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Faster index building",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Lower recall but faster queries",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "How much memory do 1,000,000 vectors of dimension 768 need when stored as 32-bit floats?",
+    "explanation": "1,000,000 × 768 × 4 bytes = 3,072,000,000 bytes ≈ 3.07 GB, before any index overhead.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "About 768 MB",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "About 30.7 GB",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "About 3.07 GB",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "About 307 MB",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "How is the recall of an ANN index measured?",
+    "explanation": "Run exact search on sample queries to get the true top-k, then measure what fraction of those the ANN index found. Fast but low-recall indexes silently return worse passages.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The fraction of queries that return any result at all",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The fraction of the true (exact) top-k neighbours that the index actually returns",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "The number of queries per second",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The distance to the first result",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "For a collection of about 3,000 chunks, what is a sensible search approach?",
+    "explanation": "Scanning a few thousand vectors takes very little time. ANN indexes pay off at much larger scales.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Exact brute-force search, which is simple and fast enough",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Always build an HNSW index with very high M",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "An IVF index with 1,000 lists",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "A distributed vector database cluster",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "An HNSW query returns its top 40 candidates, and then a WHERE filter for one student's uploads removes most of them. What is the risk, and what is a reasonable remedy?",
+    "explanation": "Post-filtering an approximate candidate list can starve the result set. Larger candidate lists, iterative index scans, per-tenant partitions, or exact search over a small pre-filtered set fix it.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "There is no risk; filters are always applied inside the index",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The index becomes corrupted and must be rebuilt",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The filter changes the distances between vectors",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "You may get fewer than k results or miss good matches; raise ef_search, use iterative scans, or filter or partition first",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "mcq",
+    "stem": "Why does an HNSW search start at the top layer?",
+    "explanation": "Each higher layer holds roughly 1/M of the nodes below it. Long hops at the top narrow the region fast; layer 0, which holds every vector, is used for the final careful search.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The top layer contains the most nodes",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The top layer stores exact distances to every vector",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The top layer has few nodes with long-range links, so greedy search reaches the right region quickly before refining in lower layers",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "Layer 0 cannot be searched",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "vector-search",
+    "lesson": "vector-search-and-hnsw",
+    "type": "short",
+    "stem": "Explain how an HNSW index finds nearest neighbours quickly.",
+    "explanation": "Greedy search on a layered proximity graph, from sparse top layers down to layer 0; approximate, tuned by ef_search.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Describes a graph in which each vector is linked to near neighbours and search greedily moves to the neighbour closest to the query",
+          "points": 1
+        },
+        {
+          "id": "c2",
+          "description": "Describes the hierarchy: sparse upper layers with long hops, descending layer by layer to the full bottom layer",
+          "points": 1
+        },
+        {
+          "id": "c3",
+          "description": "Notes that it is approximate, with a recall–latency trade-off controlled by parameters such as ef_search or M",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "HNSW builds a graph where each vector links to some of its nearest neighbours. Searching means greedily walking from an entry point to whichever neighbour is closer to the query until no neighbour is closer. The graph has layers: every vector is in layer 0, and exponentially fewer appear in each higher layer, so the top layers act like express routes with long hops. Search starts at the top, descends to the closest node, drops a layer and repeats, then does a careful search in layer 0. It is approximate: raising ef_search (or M) increases recall at the cost of latency or memory."
+    }
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "Which query is keyword (BM25) search most likely to handle better than vector search?",
+    "explanation": "Exact identifiers and error codes are where keyword matching shines; embeddings tend to blur them. The other queries are paraphrase-friendly questions where vector search does well.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "why do we shrink attention scores?",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "explain overfitting in simple words",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "ERR_CONN_RESET",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "what is a good chunk size?",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "What does hybrid search combine?",
+    "explanation": "Hybrid search runs keyword (lexical) and vector (semantic) retrieval and merges their rankings, because the two methods fail on different queries.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Keyword search results and vector search results",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Two different embedding models",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Training data and validation data",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "CPU and GPU indexes",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "With reciprocal rank fusion and k = 60, what does a document ranked 1st in vector search and 3rd in BM25 score?",
+    "explanation": "RRF adds 1/(k + rank) for each list: 1/(60 + 1) + 1/(60 + 3) = 0.016393 + 0.015873 ≈ 0.0323. Option A forgets to add k to the second rank.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "1/60 + 1/3",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "1/61 + 1/63 ≈ 0.0323",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "1/4",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "1/64 ≈ 0.0156",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "Why does reciprocal rank fusion use ranks instead of adding the raw scores?",
+    "explanation": "Cosine similarities sit in a narrow band while BM25 scores are unbounded and query-dependent, so adding them lets one scale dominate. First place means the same thing in any list.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Ranks are faster to compute",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Raw scores are always negative",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "RRF only works with integers",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Raw scores from vector and keyword search are on unrelated scales, while ranks are directly comparable",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "Vector search returns P, Q, T, S, R. BM25 returns R, S, P, U. Using RRF with k = 60, which document is ranked first?",
+    "explanation": "P scores 1/61 + 1/63 ≈ 0.03227; R scores 1/65 + 1/61 ≈ 0.03178; S scores 1/64 + 1/62 ≈ 0.03175; Q scores only 1/62 ≈ 0.01613. RRF rewards agreement between lists.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Q, because it was second in vector search",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "R, because it was first in BM25",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "P, because it ranks highly in both lists",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "S, because it appears near the top of both lists",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "In BM25, what does the IDF (inverse document frequency) term do?",
+    "explanation": "Matching a rare term like 'softmax' says much more than matching 'the'. Repetitions are saturated by k₁, and length is normalised by b.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Boosts longer documents",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Gives rare terms more weight than common ones",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "Counts every repetition of a term linearly",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Measures the cosine similarity between query and document",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "What is the effect of using k = 60 rather than k = 0 in reciprocal rank fusion?",
+    "explanation": "With k = 0, rank 1 scores 1 and rank 2 scores 0.5, a huge gap. With k = 60 they score about 0.0164 and 0.0161, so documents found by several methods rise to the top.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "It flattens the differences between top ranks, so agreement across lists matters more than being first in one list",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "It makes the top-ranked document in each list dominate",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "It excludes every document ranked below 60",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "It has no effect on the final ordering",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "mcq",
+    "stem": "In a hybrid pipeline, vector search is restricted to the student's course, but keyword search is not filtered. What is the consequence?",
+    "explanation": "RRF merges whatever each list returns. Both retrievers must apply the same access filters, or out-of-scope documents can reach the prompt.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "RRF automatically ignores unfiltered results",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Nothing, because fusion re-applies the filter",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Keyword search just becomes slower",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Fusion can surface documents from outside the allowed scope, leaking content the student should not see",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "hybrid-search",
+    "lesson": "hybrid-search-and-rrf",
+    "type": "short",
+    "stem": "Compute the reciprocal rank fusion score (k = 60) for a document ranked 2nd in vector search and 4th in keyword search, and explain why RRF combines ranks rather than raw scores.",
+    "explanation": "1/62 + 1/64 ≈ 0.0318; ranks are comparable across retrievers, raw scores are not.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Computes the score correctly: 1/62 + 1/64 ≈ 0.016129 + 0.015625 ≈ 0.0318",
+          "points": 2
+        },
+        {
+          "id": "c2",
+          "description": "Explains that raw scores from different retrievers (cosine vs BM25) are on incomparable scales, while ranks are comparable",
+          "points": 2
+        }
+      ],
+      "modelAnswer": "RRF adds 1/(k + rank) for each list: 1/(60 + 2) + 1/(60 + 4) = 0.016129 + 0.015625 ≈ 0.0318. We use ranks because vector similarities and BM25 scores live on unrelated scales (cosine in a narrow band, BM25 unbounded and query-dependent), so adding them lets one dominate; a rank means the same thing in every list, and the constant k = 60 keeps the top ranks from dominating so agreement between lists is rewarded."
+    }
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "evaluating-retrieval-and-citations",
+    "type": "mcq",
+    "stem": "What does Recall@5 measure for one query?",
+    "explanation": "Recall@k asks 'how much of what we needed did we find in the top k?'. The fraction of the top k that is relevant is Precision@k.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The fraction of all relevant items that appear in the top 5 results",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "The fraction of the top 5 results that are relevant",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "The rank of the first relevant result",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "How long the top 5 results take to retrieve",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "why-rag-grounding-answers",
+    "type": "mcq",
+    "stem": "What makes a RAG answer 'grounded'?",
+    "explanation": "Groundedness means the answer's claims can be traced to the retrieved passages. An answer can be correct but ungrounded if the model relied on its own memory.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "It is long and detailed",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "It was produced by the newest model",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Every claim in it is supported by the provided source passages",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "It cites at least one web page",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "evaluating-retrieval-and-citations",
+    "type": "mcq",
+    "stem": "Four test queries have their first relevant result at ranks 1, 3, none, and 2. What is the mean reciprocal rank (MRR)?",
+    "explanation": "Reciprocal ranks are 1, 1/3, 0 and 1/2; their mean is 1.833/4 ≈ 0.458. Getting 0.611 means the query with no relevant result was dropped instead of counted as 0.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "About 0.611",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "0.5",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "1.5",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "About 0.458",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "evaluating-retrieval-and-citations",
+    "type": "mcq",
+    "stem": "An answer cites [c7], but c7 is not among the passages that were retrieved and shown to the model. What should the system conclude?",
+    "explanation": "Citation validation checks every cited ID against the set of passages actually provided. A citation outside that set cannot have been read by the model.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "The citation is fine, because the model may know other passages",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "The citation is fabricated, so it should be stripped or the answer flagged",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "The retrieval index is corrupted",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "The model has extra knowledge, so the answer is more trustworthy",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "evaluating-retrieval-and-citations",
+    "type": "mcq",
+    "stem": "Before relying on an LLM-as-judge to grade answers, what should you do?",
+    "explanation": "Judges can favour long or confident answers and disagree with humans on edge cases. Measuring agreement against human labels tells you when the judge can be trusted.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Calibrate it: have humans score a sample with the same rubric and measure agreement with the judge",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Use the largest available model, which needs no checking",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Instruct it to be strict",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Nothing; LLM judges are unbiased",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "why-rag-grounding-answers",
+    "type": "mcq",
+    "stem": "When retrieval finds nothing relevant to a student's question, what should the tutor do?",
+    "explanation": "Honesty about gaps protects trust. Citing an irrelevant passage is a fabricated grounding, and silently answering from memory hides that nothing supports the answer.",
+    "difficulty": 0.3,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Answer confidently from general knowledge without saying so",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "Cite the closest passage anyway",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Refuse to respond at all",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "Say the course material does not cover it and, if allowed, give a clearly labelled general explanation",
+        "isCorrect": true
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "evaluating-retrieval-and-citations",
+    "type": "mcq",
+    "stem": "Your system passes 40 of 50 golden cases. After a prompt tweak it passes 42 of 50. What is the best interpretation?",
+    "explanation": "SE = √(0.8 × 0.2 / 50) ≈ 0.057, so the 95% interval is about 0.69–0.91. A two-case change is well inside it. Comparing both versions on the same cases and counting disagreements is more sensitive.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "A clear 4-point improvement; ship it",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "A statistically significant improvement",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Within noise: the 95% interval around 0.8 is roughly ±0.11, so you need more cases or a paired comparison",
+        "isCorrect": true
+      },
+      {
+        "label": "D",
+        "text": "A regression",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "evaluating-retrieval-and-citations",
+    "type": "mcq",
+    "stem": "A query's top 3 results have binary relevance [1, 0, 1]. What is nDCG@3?",
+    "explanation": "DCG = 1/log₂2 + 0 + 1/log₂4 = 1.5. The ideal order [1, 1, 0] gives IDCG = 1 + 1/log₂3 ≈ 1.631. nDCG = 1.5/1.631 ≈ 0.920. The value 1.5 is the unnormalised DCG.",
+    "difficulty": 0.7,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "1.0",
+        "isCorrect": false
+      },
+      {
+        "label": "B",
+        "text": "About 0.920",
+        "isCorrect": true
+      },
+      {
+        "label": "C",
+        "text": "About 0.667",
+        "isCorrect": false
+      },
+      {
+        "label": "D",
+        "text": "1.5",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "rag-evaluation",
+    "lesson": "evaluating-retrieval-and-citations",
+    "type": "short",
+    "stem": "What is the difference between a correct answer and a grounded answer in a RAG system, and how would you check its citations?",
+    "explanation": "Correct = factually right; grounded = supported by retrieved passages. Check cited IDs exist in the retrieved set and support the claims.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Distinguishes the two: grounded means every claim is supported by the retrieved passages; an answer can be correct but ungrounded (from model memory) or grounded in a wrong source",
+          "points": 2
+        },
+        {
+          "id": "c2",
+          "description": "States that every cited ID must be one of the passages actually retrieved/shown to the model",
+          "points": 1
+        },
+        {
+          "id": "c3",
+          "description": "States that the cited passage must actually support the claim it is attached to",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "A correct answer is factually right; a grounded answer is one whose every claim is supported by the passages the system retrieved. They differ: the model can give a correct answer from its own memory that no passage supports, which cannot be cited or verified. To check citations, first confirm that every cited ID is in the set of passages that were actually shown to the model (anything else is fabricated and should be stripped or flagged), then check that each cited passage really supports the sentence it is attached to, by rule-based checks or a calibrated judge."
+    }
+  }
+]

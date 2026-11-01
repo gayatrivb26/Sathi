@@ -1,0 +1,2 @@
+{"id": "fx-tut-1", "question": "Why do we divide attention scores by the square root of d_k?", "level": "beginner", "mode": "explain", "must_include_any": ["softmax", "variance"], "must_cite": true}
+{"id": "fx-tut-2", "question": "What's a good recipe for chocolate chip cookies?", "level": "beginner", "mode": "explain", "must_include_any": ["not covered", "course material", "general"], "must_cite": false}

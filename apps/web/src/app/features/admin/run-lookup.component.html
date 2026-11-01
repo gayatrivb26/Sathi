@@ -1,0 +1,183 @@
+<section class="card search" aria-labelledby="look-h">
+  <h2 id="look-h">Look up a reference ID</h2>
+  <p class="muted small">Paste what the student quoted — <code>7F3A-91C2</code>, <code>7F3A91C2</code>, a 32-character trace ID or a run ID.</p>
+  <form (ngSubmit)="search()" class="search-row">
+    <mat-form-field class="grow" subscriptSizing="dynamic">
+      <mat-label>Reference, trace or run ID</mat-label>
+      <input matInput name="q" [(ngModel)]="query" autocomplete="off" spellcheck="false" placeholder="7F3A-91C2" />
+    </mat-form-field>
+    <button matButton="filled" type="submit" [disabled]="!query.trim()"><app-icon name="search" [size]="18" /> Look up</button>
+  </form>
+</section>
+
+@if (loading()) {
+  <div class="stack gap"><app-skeleton [lines]="4" /><app-skeleton [lines]="6" /></div>
+} @else if (error(); as e) {
+  <div class="gap">
+    @if (e.code === 'NOT_FOUND') {
+      <app-error-state [error]="e" title="No run found for that ID" [retryable]="false" />
+      <p class="muted small hint">Reference IDs come from error messages and failed uploads. Runs are kept for 90 days.</p>
+    } @else {
+      <app-error-state [error]="e" title="The lookup failed" (retry)="retry()" />
+    }
+  </div>
+} @else if (detail(); as d) {
+  <div class="detail gap">
+    <!-- Summary -->
+    <section class="card" aria-labelledby="run-h">
+      <header class="run-head">
+        <div>
+          <p class="eyebrow">{{ d.run.type.replace('_', ' ') }} run</p>
+          <h2 id="run-h" class="run-title">Reference <span class="mono">{{ d.run.referenceId }}</span></h2>
+        </div>
+        <span class="status" [class]="d.run.status">
+          <app-icon [name]="d.run.status === 'succeeded' ? 'check-circle' : d.run.status === 'failed' ? 'x-circle' : 'clock'" [size]="16" />
+          {{ d.run.status }}
+        </span>
+      </header>
+
+      @if (d.run.errorCode) {
+        <div class="err-box" role="note">
+          <p class="code mono">{{ d.run.errorCode }}</p>
+          <p>{{ d.run.errorMessage }}</p>
+        </div>
+      }
+
+      <dl class="facts">
+        <div><dt>Started</dt><dd>{{ d.run.startedAt | date: 'd MMM y, HH:mm:ss' }}</dd></div>
+        <div><dt>Finished</dt><dd>{{ d.run.finishedAt ? (d.run.finishedAt | date: 'HH:mm:ss') : '—' }}</dd></div>
+        <div><dt>Latency</dt><dd class="num">{{ formatMs(totalMs()) }}</dd></div>
+        <div><dt>Time to first token</dt><dd class="num">{{ formatMs(d.run.ttftMs) }}</dd></div>
+        <div><dt>Model</dt><dd>{{ d.run.model ?? '—' }}{{ d.run.provider ? ' · ' + d.run.provider : '' }}</dd></div>
+        <div><dt>Tokens (in / out)</dt><dd class="num">{{ d.run.inputTokens ?? '—' }} / {{ d.run.outputTokens ?? '—' }}</dd></div>
+        <div><dt>Estimated cost</dt><dd class="num">{{ d.run.estimatedCostUsd !== null ? '$' + (d.run.estimatedCostUsd | number: '1.4-4') : '—' }}</dd></div>
+        <div><dt>Prompt hash</dt><dd class="mono small">{{ d.run.promptHash ?? '—' }}</dd></div>
+        <div><dt>User hash</dt><dd class="mono small">{{ d.run.userIdHash ?? '—' }}</dd></div>
+        <div><dt>Run ID</dt><dd class="mono small wrap">{{ d.run.id }}</dd></div>
+        <div class="wide">
+          <dt>Trace ID</dt>
+          <dd class="mono small wrap">{{ d.run.traceId }} <button type="button" class="copy" (click)="copy(d.run.traceId)" aria-label="Copy trace ID"><app-icon name="copy" [size]="15" /></button></dd>
+        </div>
+        @if (d.run.conversationId) { <div><dt>Conversation</dt><dd class="mono small wrap">{{ d.run.conversationId }}</dd></div> }
+        @if (d.run.documentId) { <div><dt>Document</dt><dd class="mono small wrap">{{ d.run.documentId }}</dd></div> }
+        @if (d.run.hangfireJobId) { <div><dt>Hangfire job</dt><dd class="mono small">#{{ d.run.hangfireJobId }}</dd></div> }
+      </dl>
+
+      <div class="links">
+        <a matButton="outlined" [href]="d.links.grafanaLogs" target="_blank" rel="noopener noreferrer"><app-icon name="external" [size]="16" /> Logs in Grafana</a>
+        <a matButton="outlined" [href]="d.links.grafanaTrace" target="_blank" rel="noopener noreferrer"><app-icon name="activity" [size]="16" /> Trace in Grafana</a>
+        @if (d.links.hangfireJob) {
+          <a matButton="outlined" [href]="d.links.hangfireJob" target="_blank" rel="noopener noreferrer"><app-icon name="layers" [size]="16" /> Hangfire job</a>
+        }
+      </div>
+    </section>
+
+    <!-- Steps timeline -->
+    <section class="card" aria-labelledby="steps-h">
+      <h2 id="steps-h" class="card-title">Steps</h2>
+      @if (d.steps.length) {
+        <ol class="steps">
+          @for (s of d.steps; track $index) {
+            <li class="step" [class]="s.outcome">
+              <div class="step-head">
+                <span class="step-name mono">{{ s.step }}</span>
+                <span class="outcome" [class]="s.outcome">{{ s.outcome }}</span>
+                <span class="muted small num">{{ stepDuration(s) }}</span>
+              </div>
+              <div class="track" aria-hidden="true"><span class="seg" [style.left.%]="stepOffset(s)" [style.width.%]="stepWidth(s)"></span></div>
+              @if ((s.metrics | keyvalue).length) {
+                <dl class="metrics">
+                  @for (m of s.metrics | keyvalue; track m.key) {
+                    <div><dt>{{ m.key }}</dt><dd class="mono">{{ isPrimitive(m.value) ? m.value : (m.value | json) }}</dd></div>
+                  }
+                </dl>
+              }
+            </li>
+          }
+        </ol>
+      } @else {
+        <p class="muted">No steps recorded.</p>
+      }
+    </section>
+
+    @if (d.ingestionJob; as j) {
+      <section class="card" aria-labelledby="job-h">
+        <h2 id="job-h" class="card-title">Ingestion job</h2>
+        <dl class="facts">
+          <div><dt>Status</dt><dd>{{ j.status }}</dd></div>
+          <div><dt>Stage</dt><dd>{{ j.stage }}</dd></div>
+          <div><dt>Attempt</dt><dd class="num">{{ j.attempt }}</dd></div>
+          <div><dt>Error</dt><dd class="mono">{{ j.errorCode ?? '—' }}</dd></div>
+          <div class="wide"><dt>Message</dt><dd>{{ j.errorMessage ?? '—' }}</dd></div>
+          <div><dt>Document</dt><dd class="mono small wrap">{{ j.documentId }}</dd></div>
+          <div><dt>Hangfire job</dt><dd class="mono small">{{ j.hangfireJobId ? '#' + j.hangfireJobId : '—' }}</dd></div>
+        </dl>
+      </section>
+    }
+
+    @if (d.aiService; as ai) {
+      <section class="card" aria-labelledby="ai-h">
+        <h2 id="ai-h" class="card-title">AI service detail</h2>
+        @if (ai.modelRuns.length) {
+          <h3>Model calls</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Purpose</th><th scope="col">Model</th><th scope="col">Prompt</th><th scope="col">Tokens</th><th scope="col">TTFT</th><th scope="col">Latency</th><th scope="col">Retries</th><th scope="col">Finish</th></tr></thead>
+              <tbody>
+                @for (m of ai.modelRuns; track $index) {
+                  <tr>
+                    <td>{{ m.purpose }}</td>
+                    <td>{{ m.model }}@if (m.fallbackUsed) { <span class="pill amber">fallback</span> }</td>
+                    <td class="mono small">{{ m.promptName }}&#64;{{ m.promptVersion }}</td>
+                    <td class="num">{{ m.inputTokens }} / {{ m.outputTokens }}</td>
+                    <td class="num">{{ formatMs(m.ttftMs) }}</td>
+                    <td class="num">{{ formatMs(m.latencyMs) }}</td>
+                    <td class="num">{{ m.retries }}</td>
+                    <td>{{ m.finishReason }}@if (m.errorCode) { <span class="mono err-t"> · {{ m.errorCode }}</span> }</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        @for (r of ai.retrievalRuns; track $index) {
+          <h3>Retrieval · {{ r.method }} · top {{ r.topK }} · {{ r.resultCount }} results{{ r.empty ? ' (empty)' : '' }}</h3>
+          <p class="muted small">
+            @for (t of r.timings | keyvalue; track t.key) { <span class="timing">{{ t.key }} {{ t.value }} ms</span> }
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th scope="col">Rank</th><th scope="col">Type</th><th scope="col">Source</th><th scope="col">Score</th><th scope="col">Cited</th></tr></thead>
+              <tbody>
+                @for (s of r.sources; track s.rank) {
+                  <tr>
+                    <td class="num">{{ s.rank }}</td>
+                    <td><span class="pill" [class.web]="s.sourceType === 'web'" [class.upload]="s.sourceType === 'upload'">{{ s.sourceType }}</span></td>
+                    <td>{{ s.title }}</td>
+                    <td class="num">{{ s.score | number: '1.2-2' }}</td>
+                    <td>{{ s.cited ? 'Yes' : 'No' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+        @for (s of ai.searchRuns; track $index) {
+          <h3>Web search · {{ s.provider }} · {{ s.outcome }}</h3>
+          <p class="small">{{ s.resultCount }} results in {{ formatMs(s.latencyMs) }}{{ s.cacheHit ? ' (cache hit)' : '' }}{{ s.errorCode ? ' · ' + s.errorCode : '' }}</p>
+          <ul class="urls">@for (u of s.urls; track u) { <li class="mono small">{{ u }}</li> }</ul>
+        }
+      </section>
+    }
+  </div>
+} @else {
+  <div class="card tips gap">
+    <h2 class="card-title">How to use this</h2>
+    <ol>
+      <li>Ask the student for the reference shown with their error (for example “Reference 7F3A-91C2”).</li>
+      <li>Look it up here to see the run, every step and its error code.</li>
+      <li>Open the logs or trace in Grafana for the exact failing call.</li>
+    </ol>
+    <p class="muted small">Try the demo reference <button type="button" class="link" (click)="query = '7F3A-91C2'; search()">7F3A-91C2</button>.</p>
+  </div>
+}

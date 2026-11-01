@@ -1,0 +1,4 @@
+<Project>
+  <!-- Central package versions are owned by services/api/Directory.Packages.props. -->
+  <Import Project="..\api\Directory.Packages.props" />
+</Project>

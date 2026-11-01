@@ -1,0 +1,42 @@
+# Prometheus — scrapes the OTel Collector's Prometheus exporter (application metrics)
+# plus the observability components themselves. Tempo's metrics generator remote-writes
+# span metrics / service graph series (--web.enable-remote-write-receiver).
+global:
+  scrape_interval: 15s
+  evaluation_interval: 30s
+  external_labels:
+    stack: sathi
+
+rule_files:
+  - /etc/prometheus/alerts.yml
+
+# Paging is connected when a production target exists (master spec §7.7). Until then
+# alerts are visible at http://localhost:9090/alerts and in Grafana.
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ["alertmanager:9093"]
+
+scrape_configs:
+  # Application metrics (api, jobs, ai-service, ai-ingest) exported via OTLP.
+  # The exporter sets job=<service.name> (or <service.namespace>/<service.name>).
+  - job_name: otel-collector-apps
+    honor_labels: true
+    static_configs:
+      - targets: ["otel-collector:8889"]
+
+  - job_name: otel-collector
+    static_configs:
+      - targets: ["otel-collector:8888"]
+
+  - job_name: loki
+    static_configs:
+      - targets: ["loki:3100"]
+
+  - job_name: tempo
+    static_configs:
+      - targets: ["tempo:3200"]
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

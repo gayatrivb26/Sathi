@@ -1,0 +1,270 @@
+[
+  {
+    "concept": "gradient-descent",
+    "lesson": "gd",
+    "type": "mcq",
+    "stem": "gradient-descent question 1?",
+    "explanation": "Because of gradient-descent.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gd",
+    "type": "mcq",
+    "stem": "gradient-descent question 2?",
+    "explanation": "Because of gradient-descent.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "gradient-descent",
+    "lesson": "gd",
+    "type": "mcq",
+    "stem": "gradient-descent question 3?",
+    "explanation": "Because of gradient-descent.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "emb",
+    "type": "mcq",
+    "stem": "embeddings question 1?",
+    "explanation": "Because of embeddings.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "emb",
+    "type": "mcq",
+    "stem": "embeddings question 2?",
+    "explanation": "Because of embeddings.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "emb",
+    "type": "mcq",
+    "stem": "embeddings question 3?",
+    "explanation": "Because of embeddings.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "att",
+    "type": "mcq",
+    "stem": "attention question 1?",
+    "explanation": "Because of attention.",
+    "difficulty": 0.5,
+    "isDiagnostic": true,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "att",
+    "type": "mcq",
+    "stem": "attention question 2?",
+    "explanation": "Because of attention.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "attention",
+    "lesson": "att",
+    "type": "mcq",
+    "stem": "attention question 3?",
+    "explanation": "Because of attention.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [
+      {
+        "label": "A",
+        "text": "Right",
+        "isCorrect": true
+      },
+      {
+        "label": "B",
+        "text": "Wrong",
+        "isCorrect": false
+      },
+      {
+        "label": "C",
+        "text": "Also wrong",
+        "isCorrect": false
+      }
+    ],
+    "rubric": null
+  },
+  {
+    "concept": "embeddings",
+    "lesson": "emb",
+    "type": "short",
+    "stem": "Why use cosine similarity?",
+    "explanation": "It ignores magnitude.",
+    "difficulty": 0.5,
+    "isDiagnostic": false,
+    "options": [],
+    "rubric": {
+      "criteria": [
+        {
+          "id": "c1",
+          "description": "Mentions direction",
+          "points": 2
+        },
+        {
+          "id": "c2",
+          "description": "Mentions magnitude",
+          "points": 1
+        }
+      ],
+      "modelAnswer": "It compares direction, not length."
+    }
+  }
+]

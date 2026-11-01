@@ -1,0 +1,88 @@
+@use '@angular/material' as mat;
+
+// Angular Material (M3) themed from the Sathi tokens. `mat.theme` emits the full system; the
+// overrides then point the important system colours at our CSS variables so light/dark follow
+// the token switch automatically.
+html {
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$violet-palette,
+        tertiary: mat.$orange-palette,
+        theme-type: color-scheme,
+      ),
+      typography: (
+        plain-family: var(--font-body),
+        brand-family: var(--font-head),
+        bold-weight: 700,
+        medium-weight: 600,
+        regular-weight: 400,
+      ),
+      density: 0,
+    )
+  );
+
+  @include mat.theme-overrides(
+    (
+      primary: var(--primary),
+      on-primary: var(--on-primary),
+      primary-container: var(--primary-soft),
+      on-primary-container: var(--primary-soft-ink),
+      secondary-container: var(--primary-soft),
+      on-secondary-container: var(--primary-soft-ink),
+      tertiary: var(--amber-bar),
+      surface: var(--surface),
+      on-surface: var(--ink),
+      on-surface-variant: var(--muted),
+      surface-container-lowest: var(--surface),
+      surface-container-low: var(--surface),
+      surface-container: var(--surface),
+      surface-container-high: var(--surface),
+      surface-container-highest: var(--surface-3),
+      inverse-surface: var(--ink),
+      inverse-on-surface: var(--surface),
+      inverse-primary: var(--primary-soft),
+      outline: var(--border-input),
+      outline-variant: var(--border),
+      error: var(--danger),
+      background: var(--bg),
+      on-background: var(--ink),
+    )
+  );
+
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 12px,
+      outlined-container-shape: 12px,
+      text-container-shape: 12px,
+      tonal-container-shape: 12px,
+      protected-container-shape: 12px,
+      filled-container-height: 44px,
+      outlined-container-height: 44px,
+      text-container-height: 44px,
+      tonal-container-height: 44px,
+      protected-container-height: 44px,
+      outlined-outline-color: var(--border-input),
+      outlined-label-text-color: var(--primary-ink),
+      text-label-text-color: var(--primary-ink),
+      filled-label-text-weight: 600,
+      outlined-label-text-weight: 600,
+      text-label-text-weight: 600,
+      tonal-label-text-weight: 600,
+    )
+  );
+
+  @include mat.form-field-overrides(
+    (
+      outlined-container-shape: 12px,
+      outlined-outline-color: var(--border-input),
+    )
+  );
+
+  @include mat.dialog-overrides(
+    (
+      container-shape: 20px,
+      container-color: var(--surface),
+    )
+  );
+}

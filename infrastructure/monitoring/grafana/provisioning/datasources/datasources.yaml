@@ -1,0 +1,96 @@
+# Grafana datasources with trace <-> logs <-> metrics links.
+#   Tempo span  -> "Logs for this span"  (tracesToLogsV2 -> Loki, filtered by trace_id)
+#   Loki line   -> "View trace"          (derived field trace_id -> Tempo)
+#   Prometheus  -> exemplars -> Tempo
+apiVersion: 1
+
+deleteDatasources:
+  - name: Loki
+    orgId: 1
+  - name: Tempo
+    orgId: 1
+  - name: Prometheus
+    orgId: 1
+
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo
+          urlDisplayLabel: View trace
+
+  - name: Loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      maxLines: 2000
+      derivedFields:
+        # OTLP logs: trace_id is structured metadata on every line.
+        - name: TraceID
+          matcherType: label
+          matcherRegex: trace_id
+          datasourceUid: tempo
+          url: "$${__value.raw}"
+          urlDisplayLabel: View trace
+        # Fallback for JSON bodies that embed "trace_id":"<32 hex>".
+        - name: TraceIDInBody
+          matcherType: regex
+          matcherRegex: '"trace_id"\s*:\s*"([0-9a-f]{32})"'
+          datasourceUid: tempo
+          url: "$${__value.raw}"
+          urlDisplayLabel: View trace (from body)
+
+  - name: Tempo
+    uid: tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    editable: false
+    jsonData:
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: "-5m"
+        spanEndTimeShift: "5m"
+        filterByTraceID: true
+        filterBySpanID: false
+        customQuery: true
+        # All services' log lines for this trace, across api, jobs, ai-service and ai-ingest.
+        query: '{service_name=~".+"} | trace_id="$${__trace.traceId}"'
+      tracesToMetrics:
+        datasourceUid: prometheus
+        spanStartTimeShift: "-10m"
+        spanEndTimeShift: "10m"
+        tags:
+          - { key: service.name, value: service }
+        queries:
+          - name: Request rate
+            query: 'sum(rate(traces_spanmetrics_calls_total{$$__tags}[5m]))'
+          - name: Error rate
+            query: 'sum(rate(traces_spanmetrics_calls_total{$$__tags, status_code="STATUS_CODE_ERROR"}[5m]))'
+      serviceMap:
+        datasourceUid: prometheus
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+      lokiSearch:
+        datasourceUid: loki
+      traceQuery:
+        timeShiftEnabled: true
+        spanStartTimeShift: "-30m"
+        spanEndTimeShift: "30m"
+      streamingEnabled:
+        search: true
+        query: true

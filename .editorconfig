@@ -1,0 +1,40 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.{cs,csx}]
+indent_size = 4
+dotnet_sort_system_directives_first = true
+csharp_style_namespace_declarations = file_scoped:warning
+csharp_prefer_braces = true:suggestion
+dotnet_style_qualification_for_field = false:suggestion
+
+[*.{csproj,props,targets,sln,slnx}]
+indent_size = 2
+
+[*.py]
+indent_size = 4
+max_line_length = 100
+
+[*.{ps1,psm1}]
+end_of_line = crlf
+indent_size = 4
+
+[*.sh]
+end_of_line = lf
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[Makefile]
+indent_style = tab
+
+[*.{json,yml,yaml,ts,html,scss,css}]
+indent_size = 2

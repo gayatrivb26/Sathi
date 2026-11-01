@@ -1,0 +1,149 @@
+@switch (structure.status()) {
+  @case ('loading') { <div class="layout"><app-skeleton [lines]="8" /><app-skeleton [lines]="10" /></div> }
+  @case ('error') { <app-error-state [error]="structure.error()" title="We couldn’t load the course" (retry)="structure.load()" /> }
+  @case ('ready') {
+    @if (structure.data(); as course) {
+      <div class="layout">
+        <!-- Outline -->
+        <nav class="card outline" aria-label="Course outline">
+          <button type="button" class="node top" [class.on]="selection().kind === 'course'" (click)="select('course')" [attr.aria-current]="selection().kind === 'course' ? 'true' : null">
+            <app-icon name="settings" [size]="16" /> Course details
+          </button>
+          <button type="button" class="node top" [class.on]="selection().kind === 'concepts'" (click)="select('concepts')" [attr.aria-current]="selection().kind === 'concepts' ? 'true' : null">
+            <app-icon name="brain" [size]="16" /> Concepts <span class="count">{{ concepts().length }}</span>
+          </button>
+          <ol class="mods">
+            @for (m of course.modules; track m.id) {
+              <li>
+                <div class="mod">
+                  <span class="mod-t">{{ m.position }}. {{ m.title }}</span>
+                  <button type="button" class="tiny" (click)="deleteModule(m.id, m.title)" [attr.aria-label]="'Delete module ' + m.title"><app-icon name="trash" [size]="15" /></button>
+                </div>
+                <ol class="les">
+                  @for (l of m.lessons; track l.id) {
+                    <li>
+                      <button type="button" class="node" [class.on]="isLesson(l.id)" (click)="selectLesson(l.id, m.id)" [attr.aria-current]="isLesson(l.id) ? 'true' : null">
+                        <span class="dot" aria-hidden="true"></span> {{ l.title }}
+                      </button>
+                    </li>
+                  }
+                  <li><button type="button" class="node add" (click)="addLesson(m.id)"><app-icon name="plus" [size]="15" /> Add lesson</button></li>
+                </ol>
+              </li>
+            }
+          </ol>
+          <button matButton="outlined" type="button" class="full" (click)="addModule()"><app-icon name="plus" [size]="16" /> Add module</button>
+        </nav>
+
+        <!-- Editor -->
+        <section class="editor" aria-live="polite">
+          @switch (selection().kind) {
+            @case ('course') {
+              <div class="card">
+                <div class="card-title">
+                  <h2>{{ ctx.course()?.title }}</h2>
+                  <a matButton="outlined" routerLink="../settings"><app-icon name="settings" [size]="16" /> Course settings</a>
+                </div>
+                @if (ctx.course()?.description) { <p class="muted">{{ ctx.course()?.description }}</p> }
+                <ul class="overview" role="list">
+                  <li><strong class="num">{{ course.modules.length }}</strong> module{{ course.modules.length === 1 ? '' : 's' }}</li>
+                  <li><strong class="num">{{ lessonCount() }}</strong> lesson{{ lessonCount() === 1 ? '' : 's' }}</li>
+                  <li><strong class="num">{{ concepts().length }}</strong> concept{{ concepts().length === 1 ? '' : 's' }}</li>
+                  <li><strong class="num">{{ ctx.course()?.classCount ?? 0 }}</strong> class{{ ctx.course()?.classCount === 1 ? '' : 'es' }}</li>
+                </ul>
+                @if (!course.modules.length) {
+                  <p class="tip"><app-icon name="info" [size]="15" /> Start with <strong>Add module</strong> on the left, then add lessons to it. Add <strong>Concepts</strong> so practice and mastery have something to track.</p>
+                } @else {
+                  <p class="muted small tip"><app-icon name="info" [size]="15" /> Pick a lesson on the left to edit its content, objectives and concepts. Title, visibility and publishing are in Course settings.</p>
+                }
+              </div>
+            }
+            @case ('concepts') {
+              <div class="card">
+                <h2 class="card-title">Concepts</h2>
+                <p class="muted small">Concepts are what mastery is tracked against. Link them to lessons and questions.</p>
+                <ul class="concepts">
+                  @for (c of concepts(); track c.id) {
+                    <li>
+                      <form class="concept-row" (ngSubmit)="saveConcept(c.id, cn.value, cd.value, c.slug)">
+                        <mat-form-field><mat-label>Name</mat-label><input matInput #cn [value]="c.name" name="n" /></mat-form-field>
+                        <mat-form-field class="grow"><mat-label>Description</mat-label><input matInput #cd [value]="c.description" name="d" /></mat-form-field>
+                        <button matButton="outlined" type="submit">Save</button>
+                      </form>
+                    </li>
+                  }
+                </ul>
+                <form class="concept-row add" (ngSubmit)="addConcept()">
+                  <mat-form-field><mat-label>New concept</mat-label><input matInput name="nn" [ngModel]="nName()" (ngModelChange)="nName.set($event)" /></mat-form-field>
+                  <mat-form-field class="grow"><mat-label>Description</mat-label><input matInput name="nd" [ngModel]="nDesc()" (ngModelChange)="nDesc.set($event)" /></mat-form-field>
+                  <button matButton="filled" type="submit" [disabled]="!nName().trim()"><app-icon name="plus" [size]="16" /> Add</button>
+                </form>
+              </div>
+            }
+            @case ('lesson') {
+              @if (lessonLoading() || !lesson()) {
+                <app-skeleton [lines]="10" />
+              } @else if (lesson(); as l) {
+                <form class="card lesson-form" (ngSubmit)="saveLesson()">
+                  <div class="card-title">
+                    <h2>Edit lesson</h2>
+                    <span class="state" [class.dirty]="dirty()">{{ dirty() ? 'Unsaved changes' : 'All changes saved' }}</span>
+                  </div>
+                  <div class="fields">
+                    <mat-form-field class="span2"><mat-label>Title</mat-label><input matInput name="title" [ngModel]="l.title" (ngModelChange)="patchLesson({ title: $event })" required /></mat-form-field>
+                    <mat-form-field class="span2"><mat-label>Summary</mat-label><input matInput name="summary" [ngModel]="l.summary" (ngModelChange)="patchLesson({ summary: $event })" /></mat-form-field>
+                    <mat-form-field><mat-label>Estimated minutes</mat-label><input matInput type="number" min="1" max="180" name="mins" [ngModel]="l.estimatedMinutes" (ngModelChange)="patchLesson({ estimatedMinutes: +$event })" /></mat-form-field>
+                    <mat-form-field>
+                      <mat-label>Concepts</mat-label>
+                      <mat-select multiple name="concepts" [value]="l.conceptIds" (valueChange)="patchLesson({ conceptIds: $event })">
+                        @for (c of concepts(); track c.id) { <mat-option [value]="c.id">{{ c.name }}</mat-option> }
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <fieldset class="objectives">
+                    <legend>Learning objectives</legend>
+                    @for (o of l.objectives; track $index; let i = $index) {
+                      <div class="obj">
+                        <mat-form-field class="grow"><mat-label>Objective {{ i + 1 }}</mat-label><input matInput [name]="'obj' + i" [ngModel]="o" (ngModelChange)="setObjective(i, $event)" /></mat-form-field>
+                        <button type="button" class="tiny" (click)="removeObjective(i)" [attr.aria-label]="'Remove objective ' + (i + 1)"><app-icon name="x" [size]="16" /></button>
+                      </div>
+                    }
+                    <button matButton="text" type="button" (click)="addObjective()"><app-icon name="plus" [size]="16" /> Add objective</button>
+                  </fieldset>
+
+                  <div class="md-head">
+                    <h3>Content</h3>
+                    <div class="seg" role="group" aria-label="Editor view">
+                      <button type="button" [attr.aria-pressed]="view() === 'write'" (click)="view.set('write')"><app-icon name="pencil" [size]="15" /> Write</button>
+                      <button type="button" [attr.aria-pressed]="view() === 'preview'" (click)="view.set('preview')"><app-icon name="eye" [size]="15" /> Preview</button>
+                    </div>
+                  </div>
+                  <div class="md" [class.show-preview]="view() === 'preview'">
+                    <div class="md-write">
+                      <label class="sr-only" for="md-src">Lesson Markdown</label>
+                      <textarea id="md-src" name="md" spellcheck="true" [ngModel]="l.contentMarkdown" (ngModelChange)="patchLesson({ contentMarkdown: $event })"></textarea>
+                      <p class="muted small">Markdown with <code>$…$</code> and <code>$$…$$</code> for maths.</p>
+                    </div>
+                    <div class="md-preview" aria-label="Live preview">
+                      <app-markdown [markdown]="l.contentMarkdown" />
+                    </div>
+                  </div>
+
+                  <div class="row actions">
+                    <button matButton="text" type="button" class="btn-danger" (click)="deleteLesson()"><app-icon name="trash" [size]="16" /> Delete</button>
+                    <span class="spacer"></span>
+                    <button matButton="filled" type="submit" [disabled]="saving() || !dirty()"><app-icon name="save" [size]="16" /> {{ saving() ? 'Saving…' : 'Save lesson' }}</button>
+                  </div>
+                  <p class="muted small">Saving creates a new version and re-indexes the lesson so the tutor cites the latest text.</p>
+                </form>
+              }
+            }
+          }
+        </section>
+      </div>
+    } @else {
+      <app-empty-state icon="book" title="No courses to edit" text="Ask an admin to give you access to a course." />
+    }
+  }
+}

@@ -1,0 +1,62 @@
+<form class="qc" (ngSubmit)="submit()">
+  @if (question().type === 'mcq') {
+    <fieldset [attr.aria-describedby]="uid + '-help'">
+      <legend class="stem">{{ question().stem }}</legend>
+      <p class="sr-only" [id]="uid + '-help'">Choose one answer.</p>
+      <div class="options">
+        @for (opt of question().options; track opt.id) {
+          <label class="opt" [class]="state(opt.id)" [class.locked]="locked()">
+            <input
+              type="radio"
+              class="opt-input"
+              [name]="uid"
+              [value]="opt.id"
+              [checked]="selected() === opt.id"
+              [disabled]="locked()"
+              (change)="choose(opt.id)"
+            />
+            <span class="letter" aria-hidden="true">
+              @switch (state(opt.id)) {
+                @case ('correct') { <app-icon name="check" [size]="16" [strokeWidth]="3" /> }
+                @case ('wrong') { <app-icon name="x" [size]="16" [strokeWidth]="3" /> }
+                @default { {{ opt.label }} }
+              }
+            </span>
+            <span class="text">
+              <span class="sr-only">{{ opt.label }}. </span>{{ opt.text }}
+              @if (state(opt.id) === 'correct') {
+                <span class="tag ok">· Correct answer{{ isYours(opt.id) ? ' · Your answer' : '' }}</span>
+              } @else if (state(opt.id) === 'wrong') {
+                <span class="tag bad">· Your answer</span>
+              }
+            </span>
+          </label>
+        }
+      </div>
+    </fieldset>
+  } @else {
+    <label class="stem" [for]="uid + '-text'">{{ question().stem }}</label>
+    <p class="hint">Answer in a few sentences. Your answer is graded against a rubric.</p>
+    <textarea
+      [id]="uid + '-text'"
+      class="short"
+      rows="5"
+      [ngModel]="freeText()"
+      (ngModelChange)="freeText.set($event)"
+      name="freeText"
+      [disabled]="locked()"
+      placeholder="Type your answer…"
+    ></textarea>
+  }
+
+  @if (!hideSubmit() && !reveal()) {
+    <div class="actions">
+      <button matButton="filled" type="submit" [disabled]="!canSubmit() || busy()">
+        @if (busy()) { <app-icon name="loader" class="spin" [size]="18" /> Checking… } @else { {{ submitLabel() }} }
+      </button>
+      @if (allowIdk()) {
+        <button matButton="outlined" type="button" (click)="idk.emit()" [disabled]="busy()">I don’t know</button>
+      }
+    </div>
+  }
+</form>
