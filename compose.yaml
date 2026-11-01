@@ -467,7 +467,7 @@ services:
     logging: *default-logging
 
   grafana:
-    image: ${GRAFANA_IMAGE:-grafana/grafana:11.5.2}
+    image: ${GRAFANA_IMAGE:-grafana/grafana:13.3.0}
     profiles: [observability]
     restart: *restart-policy
     environment:
