@@ -397,7 +397,7 @@ services:
     logging: *default-logging
 
   loki:
-    image: ${LOKI_IMAGE:-grafana/loki:3.4.2}
+    image: ${LOKI_IMAGE:-grafana/loki:3.7.9}
     profiles: [observability]
     restart: *restart-policy
     command: ["-config.file=/etc/loki/config.yaml", "-config.expand-env=true"]
