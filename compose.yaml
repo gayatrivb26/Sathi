@@ -277,7 +277,7 @@ services:
 
   # ---------------------------------------------------------------- data
   postgres:
-    image: ${POSTGRES_IMAGE:-pgvector/pgvector:0.8.0-pg17}
+    image: ${POSTGRES_IMAGE:-pgvector/pgvector:0.8.6-pg17}
     restart: *restart-policy
     environment:
       POSTGRES_DB: sathi
