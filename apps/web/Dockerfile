@@ -12,7 +12,7 @@ COPY apps/web/ ./
 RUN npm run build -- --configuration production
 
 # ---- 2. runtime -------------------------------------------------------------
-FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
+FROM nginxinc/nginx-unprivileged:1.31-alpine AS runtime
 # Static app (Angular's browser output) and the infra-owned Nginx config.
 COPY --from=build /src/apps/web/dist/web/browser /usr/share/nginx/html
 COPY infrastructure/nginx/default.conf /etc/nginx/conf.d/default.conf
