@@ -16,7 +16,7 @@ COPY services/api/src/Sathi.Core/ services/api/src/Sathi.Core/
 COPY services/api/src/Sathi.Api/ services/api/src/Sathi.Api/
 RUN dotnet publish services/api/src/Sathi.Api/Sathi.Api.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false /p:OpenApiGenerateDocuments=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS runtime
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl libgssapi-krb5-2 \
     && rm -rf /var/lib/apt/lists/*
