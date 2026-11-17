@@ -16,7 +16,7 @@ COPY services/api/src/Sathi.Core/ services/api/src/Sathi.Core/
 COPY services/api/src/Sathi.Migrator/ services/api/src/Sathi.Migrator/
 RUN dotnet publish services/api/src/Sathi.Migrator/Sathi.Migrator.csproj -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS runtime
 # libgssapi-krb5-2: Npgsql probes for GSSAPI on connect and logs an error when it is missing.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libgssapi-krb5-2 \
